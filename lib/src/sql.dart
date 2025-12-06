@@ -8,7 +8,6 @@ import 'dart:typed_data';
 
 import 'package:entao_dutil/entao_dutil.dart';
 import 'package:entao_log/entao_log.dart';
-import 'package:postgres/postgres.dart' hide Type;
 import 'package:sqlite3/sqlite3.dart';
 
 import 'sqlite3_ffi.dart' as xsql;
@@ -32,6 +31,9 @@ part 'clause/where.dart';
 part 'configs.dart';
 part 'pragma.dart';
 part 'sql_utils.dart';
+
+typedef FutureCallback = Future<void> Function();
+typedef FutureOrCallback = FutureOr<void> Function();
 
 TagLog logSQL = TagLog("SQL");
 

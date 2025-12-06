@@ -2,6 +2,10 @@ part of 'sql.dart';
 
 abstract class SQLExecutor {
   FutureOr<QueryResult> query(String sql, {AnyList? parameters});
+
+  FutureOr<void> execute(String sql, {AnyList? parameters});
+
+  FutureOr<void> transaction(FutureOr<void> Function() callback);
 }
 
 class QueryResult extends UnmodifiableListView<List<Object?>> {
@@ -10,14 +14,6 @@ class QueryResult extends UnmodifiableListView<List<Object?>> {
   int labelIndex(String label) => meta.labelIndex(label);
 
   QueryResult(super.source, {required this.meta});
-}
-
-class RowData extends UnmodifiableListView<Object?> {
-  RowData(super.source);
-}
-
-abstract interface class CursorResult {
-  Iterator<RowData> get iterator;
 }
 
 class ResultMeta {
@@ -32,10 +28,17 @@ class ResultMeta {
 }
 
 class ColumnMeta {
-  String label;
-  int typeId;
+  final String label;
+  final int typeId;
 
   ColumnMeta({required this.label, this.typeId = 0});
 }
 
+//------------------
+class RowData extends UnmodifiableListView<Object?> {
+  RowData(super.source);
+}
 
+abstract interface class CursorResult {
+  Iterator<RowData> get iterator;
+}

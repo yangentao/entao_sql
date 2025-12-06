@@ -11,10 +11,30 @@ class SQliteExecutor extends SQLExecutor {
   SQliteExecutor(this.lite);
 
   @override
-  FutureOr<QueryResult> query(String sql, {AnyList? parameters}) async {
-    LiteSQL lite = LiteSQL.openMemory();
+  QueryResult query(String sql, {AnyList? parameters}) {
     ResultSet rs = lite.rawQuery(sql, parameters);
     return QueryResult(rs.rows, meta: rs.meta);
+  }
+
+  @override
+  void execute(String sql, {AnyList? parameters}) {
+    lite.execute(sql, parameters);
+  }
+
+  @override
+  Future<void> transaction(FutureOr<void> Function() callback) async {
+    lite.execute("BEGIN");
+    try {
+      if (callback case FutureCallback a) {
+        await a();
+      } else {
+        callback();
+      }
+      lite.execute("COMMIT");
+    } catch (e) {
+      lite.execute("ROLLBACK");
+      rethrow;
+    }
   }
 }
 
