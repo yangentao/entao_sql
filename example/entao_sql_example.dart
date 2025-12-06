@@ -1,4 +1,4 @@
-import 'package:entao_sql/entao_sql.dart';
+import 'package:entao_sql/sqlite.dart';
 
 void main() {
 }
