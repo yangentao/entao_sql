@@ -21,11 +21,11 @@ class PostgresExecutor<T> extends SQLExecutor {
   Future<QueryResult> query(String sql, {AnyList? parameters}) async {
     if (_session case Session se) {
       Result r = await se.execute(sql, parameters: parameters, timeout: timeout, queryMode: queryMode);
-      return QueryResult(r, meta: r.meta);
+      return QueryResult(r, meta: r.meta, rawResult: r);
     } else {
       return executor.run((se) async {
         Result r = await se.execute(sql, parameters: parameters, timeout: timeout, queryMode: queryMode);
-        return QueryResult(r, meta: r.meta);
+        return QueryResult(r, meta: r.meta, rawResult: r);
       }, settings: SessionSettings(queryTimeout: timeout, queryMode: queryMode));
     }
   }

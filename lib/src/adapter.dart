@@ -9,11 +9,12 @@ abstract class SQLExecutor {
 }
 
 class QueryResult extends UnmodifiableListView<List<Object?>> {
+  final Object rawResult;
   final ResultMeta meta;
 
   int labelIndex(String label) => meta.labelIndex(label);
 
-  QueryResult(super.source, {required this.meta});
+  QueryResult(super.source, {required this.meta, required this.rawResult});
 }
 
 class ResultMeta {
