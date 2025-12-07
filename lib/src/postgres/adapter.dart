@@ -8,83 +8,81 @@ import '../sql.dart';
 // final _endpoint = Endpoint(host: 'localhost', database: 'test', username: 'test', password: 'test');
 // final poolPG = Pool.withEndpoints([_endpoint], settings: PoolSettings(sslMode: SslMode.disable));
 
-class PostgresExecutor<T> extends SQLExecutor {
-  final SessionExecutor executor;
-  final Duration? timeout;
-  final QueryMode? queryMode;
-  final TransactionSettings? transactionSettings;
-  Session? _session;
+class PgPoolExecutor<T> extends PgSessionExecutor implements SQLExecutorTx {
+  Pool<T> pool;
 
-  PostgresExecutor(this.executor, {this.timeout, this.queryMode, this.transactionSettings});
+  PgPoolExecutor(this.pool, {PostgresOptions? options}) : super(pool, options: options);
+
+  @override
+  FutureOr<void> transaction(FutureOr<void> Function(SQLExecutor) callback) {
+    pool.runTx((session) async {
+      await callback(PgSessionExecutor(session, options: options));
+    }, settings: options?.transactionSettings);
+  }
+}
+
+class PgConnectionExecutor extends PgSessionExecutor implements SQLExecutorTx {
+  Connection connection;
+
+  PgConnectionExecutor(this.connection, {PostgresOptions? options}) : super(connection, options: options);
+
+  @override
+  FutureOr<void> transaction(FutureOr<void> Function(SQLExecutor) callback) {
+    connection.runTx((session) async {
+      await callback(PgSessionExecutor(session, options: options));
+    }, settings: options?.transactionSettings);
+  }
+}
+
+class PgSessionExecutor implements SQLExecutor {
+  final Session session;
+  final PostgresOptions? options;
+
+  PgSessionExecutor(this.session, {this.options});
 
   @override
   Future<Stream<RowData>> queryStream(String sql, {AnyList? parameters}) async {
-    if (_session case Session se) {
-      Statement st = await se.prepare(sql);
-      Stream<RowData> s = st.bind(parameters).map((r) => RowData(r, meta: r.schema.meta));
-      StreamController<RowData> controller = StreamController(onCancel: () => st.dispose());
-      s.listen(controller.add, onDone: () {
-        controller.close();
-        st.dispose();
-      }, onError: controller.addError);
-      return controller.stream;
-    } else {
-      return executor.run((se) async {
-        Statement st = await se.prepare(sql);
-        Stream<RowData> s = st.bind(parameters).map((r) => RowData(r, meta: r.schema.meta));
-        StreamController<RowData> controller = StreamController(onCancel: () => st.dispose());
-        s.listen(controller.add, onDone: () {
-          controller.close();
-          st.dispose();
-        }, onError: controller.addError);
-        return controller.stream;
-      });
-    }
+    Statement st = await session.prepare(sql);
+    Stream<RowData> s = st.bind(parameters).map((r) => RowData(r, meta: r.schema.meta));
+    return s.whenComplete(() => st.dispose());
   }
 
   @override
-  Future<QueryResult> rawQuery(String sql, {AnyList? parameters}) async {
-    if (_session case Session se) {
-      Result r = await se.execute(sql, parameters: parameters, timeout: timeout, queryMode: queryMode);
-      return QueryResult(r, meta: r.meta, rawResult: r);
-    } else {
-      return executor.run((se) async {
-        Result r = await se.execute(sql, parameters: parameters, timeout: timeout, queryMode: queryMode);
-        return QueryResult(r, meta: r.meta, rawResult: r);
-      }, settings: SessionSettings(queryTimeout: timeout, queryMode: queryMode));
-    }
+  Future<QueryResult> rawQuery(String sql, {AnyList? parameters, bool ignoreRows = false}) async {
+    Result r = await session.execute(sql, parameters: parameters, timeout: options?.timeout, queryMode: options?.queryMode);
+    return r.queryResult;
   }
 
   @override
   Future<void> execute(String sql, {AnyList? parameters}) async {
-    if (_session case Session se) {
-      await se.execute(sql, parameters: parameters, timeout: timeout, ignoreRows: true, queryMode: queryMode);
-    } else {
-      return executor.run((se) async {
-        await se.execute(sql, parameters: parameters, timeout: timeout, ignoreRows: true, queryMode: queryMode);
-      }, settings: SessionSettings(queryTimeout: timeout, queryMode: queryMode));
-    }
+    await session.execute(sql, parameters: parameters, timeout: options?.timeout, ignoreRows: true, queryMode: options?.queryMode);
   }
 
   @override
-  Future<void> transaction(FutureOr<void> Function() callback) async {
-    executor.runTx((session) async {
-      _session = session;
-      try {
-        if (callback is FutureCallback) {
-          await callback();
-        } else {
-          callback();
-        }
-      } finally {
-        _session = null;
-      }
-    }, settings: transactionSettings);
+  Future<List<QueryResult>> executeMulti(String sql, List<AnyList> parametersList) async {
+    List<QueryResult> ls = [];
+    Statement st = await session.prepare(sql);
+    for (final params in parametersList) {
+      Result r = await st.run(params, timeout: options?.timeout);
+      ls << r.queryResult;
+    }
+    st.dispose();
+    return ls;
   }
+}
+
+class PostgresOptions {
+  final Duration? timeout;
+  final QueryMode? queryMode;
+  final TransactionSettings? transactionSettings;
+
+  PostgresOptions({this.timeout, this.queryMode, this.transactionSettings});
 }
 
 extension ResultMetaPGExt on Result {
   ResultMeta get meta => this.schema.meta;
+
+  QueryResult get queryResult => QueryResult(this, meta: meta, rawResult: this);
 }
 
 extension ResultMetaResultSchemaExt on ResultSchema {

@@ -1,5 +1,16 @@
 part of 'sql.dart';
 
+extension StreamDoneExt<T> on Stream<T> {
+  Stream<T> whenComplete(VoidCallback callback) {
+    StreamController<T> controller = StreamController(onCancel: callback);
+    this.listen(controller.add, onDone: () {
+      controller.close();
+      callback();
+    }, onError: controller.addError);
+    return controller.stream;
+  }
+}
+
 extension ListJoinMapEx<T> on List<T> {
   String joinMap(String sep, [String Function(T)? tranform]) {
     if (tranform == null) return join(sep);

@@ -5,7 +5,7 @@ import 'package:sqlite3/sqlite3.dart';
 
 import '../sql.dart';
 
-class SQliteExecutor extends SQLExecutor {
+class SQliteExecutor implements SQLExecutorTx {
   LiteSQL lite;
 
   SQliteExecutor(this.lite);
@@ -22,9 +22,8 @@ class SQliteExecutor extends SQLExecutor {
   }
 
   @override
-  QueryResult rawQuery(String sql, {AnyList? parameters}) {
-    ResultSet rs = lite.rawQuery(sql, parameters);
-    return QueryResult(rs.rows, meta: rs.meta, rawResult: rs);
+  QueryResult rawQuery(String sql, {AnyList? parameters, bool ignoreRows = false}) {
+    return lite.rawQuery(sql, parameters).queryResult;
   }
 
   @override
@@ -33,14 +32,22 @@ class SQliteExecutor extends SQLExecutor {
   }
 
   @override
-  Future<void> transaction(FutureOr<void> Function() callback) async {
+  void executeMulti(String sql, List<AnyList> parametersList) {
+    final st = lite.prepareSQL(sql);
+    try {
+      for (var params in parametersList) {
+        st.execute(params);
+      }
+    } finally {
+      st.close();
+    }
+  }
+
+  @override
+  Future<void> transaction(FutureOr<void> Function(SQLExecutor) callback) async {
     lite.execute("BEGIN");
     try {
-      if (callback case FutureCallback a) {
-        await a();
-      } else {
-        callback();
-      }
+      await callback(this);
       lite.execute("COMMIT");
     } catch (e) {
       lite.execute("ROLLBACK");
@@ -51,4 +58,10 @@ class SQliteExecutor extends SQLExecutor {
 
 extension ResultMetaSQLite on Cursor {
   ResultMeta get meta => ResultMeta(this.columnNames.mapIndex((i, e) => ColumnMeta(label: e, typeId: 0)));
+}
+
+extension ResultSetQueryResult on ResultSet {
+  QueryResult get queryResult {
+    return QueryResult(rows, meta: meta, rawResult: this);
+  }
 }
