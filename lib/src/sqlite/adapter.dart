@@ -22,7 +22,7 @@ class SQliteExecutor extends SQLExecutor {
   }
 
   @override
-  QueryResult query(String sql, {AnyList? parameters}) {
+  QueryResult rawQuery(String sql, {AnyList? parameters}) {
     ResultSet rs = lite.rawQuery(sql, parameters);
     return QueryResult(rs.rows, meta: rs.meta, rawResult: rs);
   }

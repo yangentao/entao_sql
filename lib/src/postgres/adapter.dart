@@ -43,7 +43,7 @@ class PostgresExecutor<T> extends SQLExecutor {
   }
 
   @override
-  Future<QueryResult> query(String sql, {AnyList? parameters}) async {
+  Future<QueryResult> rawQuery(String sql, {AnyList? parameters}) async {
     if (_session case Session se) {
       Result r = await se.execute(sql, parameters: parameters, timeout: timeout, queryMode: queryMode);
       return QueryResult(r, meta: r.meta, rawResult: r);
