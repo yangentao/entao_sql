@@ -95,10 +95,10 @@ Future<void> _addColumn(SQLExecutor executor, String table, TableColumn field) a
 }
 
 Future<void> _createTable(SQLExecutor executor, String table, List<TableColumn> fields, {List<String>? constraints, List<String>? options}) async {
-  ListString ls = [];
+  List<String> ls = [];
   ls << "CREATE TABLE IF NOT EXISTS ${table.escapeSQL} (";
 
-  ListString colList = [];
+  List<String> colList = [];
 
   List<TableColumn> keyFields = fields.filter((e) => e.proto.primaryKey);
   colList.addAll(fields.map((e) => e.defineField(keyFields.length > 1)));

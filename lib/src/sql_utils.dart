@@ -1,13 +1,5 @@
 part of 'sql.dart';
 
-extension StringOrEmptyExt on String? {
-  String? operator |(String? other) {
-    if (this == null) return other;
-    if (other == null) return this;
-    if (this!.isEmpty) return other;
-    return this;
-  }
-}
 
 extension StreamDoneExt<T> on Stream<T> {
   Stream<T> whenComplete(VoidCallback callback) {
@@ -20,16 +12,11 @@ extension StreamDoneExt<T> on Stream<T> {
   }
 }
 
-extension ListJoinMapEx<T> on List<T> {
-  String joinMap(String sep, [String Function(T)? tranform]) {
-    if (tranform == null) return join(sep);
-    return this.map(tranform).join(sep);
-  }
-}
 
 // https://sqlite.org/lang_keywords.html
 extension StringSQLExt on String {
   String get braced {
+
     if (this.length >= 2 && this[0] == '(' && this[length - 1] == ')') return this;
     return "($this)";
   }
