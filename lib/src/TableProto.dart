@@ -48,52 +48,55 @@ extension on Type {
   TableProto get proto => TableProto.of(this);
 }
 
-void _migrateEnumTable<T extends TableColumn<T>>(SQLExecutor executor, List<T> fields) {
+Future<void> _registerTable<T extends TableColumn<T>>(SQLExecutor executor, List<T> fields, {bool migrate = true}) async {
   assert(fields.isNotEmpty);
   if (TableProto.isMigrated<T>()) return;
   TableProto<T> tab = TableProto<T>._(fields.first.tableName, fields, executor: executor);
-  _migrateTable(executor, tab.name, tab.columns);
+  if (migrate) {
+    await _migrateTable(executor, tab.name, tab.columns);
+  }
 }
 
-void _migrateTable(SQLExecutor executor, String tableName, List<TableColumn> fields) {
-  if (!executor.existTable(tableName)) {
+Future<void> _migrateTable(SQLExecutor executor, String tableName, List<TableColumn> fields) async {
+  if (!await executor.tableExists(tableName)) {
     _createTable(executor, tableName, fields);
     return;
   }
 
-  List<SqliteTableInfo> cols = executor.tableInfo(tableName);
-  Set<String> colSet = cols.map((e) => e.name).toSet();
+  Set<String> colSet = await executor.tableFields(tableName);
   for (TableColumn f in fields) {
     if (!colSet.contains(f.columnName)) {
-      _addColumn(executor, tableName, f);
+      await _addColumn(executor, tableName, f);
     }
   }
   Set<String> idxSet = {};
-  List<LiteIndexItem> idxList = executor.PRAGMA.index_list(tableName);
-  for (LiteIndexItem a in idxList) {
-    List<LiteIndexInfo> ls = executor.PRAGMA.index_info(a.name);
-    idxSet.addAll(ls.map((e) => e.name));
+  Set<String> idxs = await executor.listIndex(tableName);
+  for (String idx in idxs) {
+    final fs = await executor.indexFields(idx);
+    idxSet.addAll(fs);
   }
   for (TableColumn f in fields) {
     if (f.proto.primaryKey || f.proto.unique || notBlank(f.proto.uniqueName)) continue;
     if (f.proto.index && !idxSet.contains(f.columnName)) {
-      executor.createIndex(tableName, [f.columnName]);
+      await _createIndex(executor, tableName, [f.columnName]);
     }
   }
 }
 
-void _addColumn(SQLExecutor executor, String table, TableColumn field) {
-  String sql = "ALTER TABLE ${table.escapeSQL} ADD COLUMN ${field.defineField(false)}";
-  executor.execute(sql);
+Future<void> _createIndex(SQLExecutor executor, String table, List<String> fields) async {
+  String idxName = makeIndexName(table, fields);
+  String sql = "CREATE INDEX IF NOT EXISTS $idxName ON ${table.escapeSQL} (${fields.map((e) => e.escapeSQL).join(",")})";
+  await executor.execute(sql);
 }
 
-Future<void> _createTable(SQLExecutor executor, String table, List<TableColumn> fields, {List<String>? constraints, List<String>? options, bool notExist = true}) async {
+Future<void> _addColumn(SQLExecutor executor, String table, TableColumn field) async {
+  String sql = "ALTER TABLE ${table.escapeSQL} ADD COLUMN ${field.defineField(false)}";
+  await executor.execute(sql);
+}
+
+Future<void> _createTable(SQLExecutor executor, String table, List<TableColumn> fields, {List<String>? constraints, List<String>? options}) async {
   ListString ls = [];
-  if (notExist) {
-    ls << "CREATE TABLE IF NOT EXISTS ${table.escapeSQL} (";
-  } else {
-    ls << "CREATE TABLE ${table.escapeSQL} (";
-  }
+  ls << "CREATE TABLE IF NOT EXISTS ${table.escapeSQL} (";
 
   ListString colList = [];
 
@@ -129,7 +132,7 @@ Future<void> _createTable(SQLExecutor executor, String table, List<TableColumn> 
       continue;
     }
     if (f.proto.index) {
-      await executor.createIndex(table, [f.columnName]);
+      await _createIndex(executor, table, [f.columnName]);
     }
   }
 }

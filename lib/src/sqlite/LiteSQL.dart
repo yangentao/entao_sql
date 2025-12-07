@@ -146,13 +146,13 @@ class LiteSQL {
   }
 
   void dropIndex(String table, String fieldName) {
-    String idx = _makeIndexName(table, [fieldName]);
+    String idx = makeIndexName(table, [fieldName]);
     String sql = "DROP INDEX IF EXISTS $idx";
     execute(sql);
   }
 
   void createIndex(String table, List<String> fields) {
-    String idxName = _makeIndexName(table, fields);
+    String idxName = makeIndexName(table, fields);
     String sql = "CREATE INDEX IF NOT EXISTS $idxName ON ${table.escapeSQL} (${fields.map((e) => e.escapeSQL).join(",")})";
     execute(sql);
   }
@@ -175,10 +175,6 @@ class LiteSQL {
   }
 }
 
-String _makeIndexName(String table, List<String> fields) {
-  var ls = fields.sorted(null);
-  return "${table}_${ls.join("_")}";
-}
 
 class IndexName {
   String table;

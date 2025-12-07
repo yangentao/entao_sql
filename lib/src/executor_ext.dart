@@ -220,8 +220,8 @@ extension LiteSqlInsertExt on SQLExecutor {
   }
 
   /// liteSQL.migrate(Person.values)
-  void migrate<T extends TableColumn<T>>(List<T> fields) {
-    _migrateEnumTable(this, fields);
+  void register<T extends TableColumn<T>>(List<T> fields, {bool migrate = true }) {
+    _registerTable(this, fields, migrate: migrate);
   }
 }
 
