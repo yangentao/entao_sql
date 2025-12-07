@@ -1,9 +1,5 @@
-import 'dart:async';
 
-import 'package:entao_dutil/entao_dutil.dart';
-import 'package:sqlite3/sqlite3.dart';
-
-import '../sql.dart';
+part of 'sqlite.dart';
 
 class SQliteExecutor implements SQLExecutorTx {
   LiteSQL lite;

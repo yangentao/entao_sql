@@ -1,6 +1,5 @@
 part of 'sql.dart';
 
-
 extension LiteSqlInsertExt on SQLExecutor {
   /// query([], from:Person)
   /// query(["*"], from:Person)
@@ -205,7 +204,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     return idList;
   }
 
-  int delete(Object table, {required Where where, Returning? returning}) async  {
+  int delete(Object table, {required Where where, Returning? returning}) async {
     assert(where.isNotEmpty);
     SpaceBuffer buf = SpaceBuffer("DELETE FROM");
     buf << _tableNameOf(table).escapeSQL;
@@ -213,7 +212,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     buf << where.sql;
     if (LiteSQL._supportReturning && returning != null) {
       buf << returning.clause;
-      QueryResult rs = await  rawQuery(buf.toString(), where.args);
+      QueryResult rs = await rawQuery(buf.toString(), where.args);
       returning.returnRows.addAll(rs.listRows());
     } else {
       execute(buf.toString(), where.args);
@@ -241,7 +240,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     var argList = <dynamic>[...values, ...(where.args)];
     if (LiteSQL._supportReturning && returning != null) {
       buf << returning.clause;
-      QueryResult rs = await  rawQuery(buf.toString(), argList);
+      QueryResult rs = await rawQuery(buf.toString(), argList);
       returning.returnRows.addAll(rs.listRows());
     } else {
       execute(buf.toString(), argList);
@@ -251,6 +250,16 @@ extension LiteSqlInsertExt on SQLExecutor {
 
   void dump(Type table) {
     dumpTable(_tableNameOf(table));
+  }
+
+  Future<void> dumpTable(String table) async {
+    final r = await rawQuery("SELECT * FROM ${table.escapeSQL}");
+    r.dump();
+  }
+
+  /// liteSQL.migrate(Person.values)
+  void migrate<T extends TableColumn<T>>(List<T> fields) {
+    _migrateEnumTable(this, fields);
   }
 }
 

@@ -15,7 +15,5 @@ abstract interface class SQLExecutorTx implements SQLExecutor {
 }
 
 extension ExpressExecutorExt<T extends Express> on T {
-  ResultSet query(LiteSQL lite) => lite.rawQuery(this.sql, args);
-
   Future<QueryResult> queryX(SQLExecutor e) async => await e.rawQuery(this.sql, args);
 }

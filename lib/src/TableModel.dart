@@ -8,12 +8,12 @@ class TableModel<E> {
 
   TableModel(this.model);
 
-  LiteSQL get _lite => _proto.liteSQL;
+  SQLExecutor get _executor => _proto.executor;
 
   String get _tableName => _proto.name;
 
   void dumpTable() {
-    _lite.dump(_tableType);
+    _executor.dump(_tableType);
   }
 
   void clearModifyFlag() {
@@ -33,7 +33,7 @@ class TableModel<E> {
   }
 
   int delete() {
-    return _lite.delete(_tableName, where: _keyWhere);
+    return _executor.delete(_tableName, where: _keyWhere);
   }
 
   /// update modified fields within callback by key(s),
@@ -52,7 +52,7 @@ class TableModel<E> {
     values.retainWhere((e) => e.value != null || true == columns?.contains(e.key.columnName));
     if (values.isEmpty) return 0;
     Returning ret = Returning.ALL;
-    int n = _lite.update(_tableName, values: values, where: _keyWhere, returning: ret);
+    int n = _executor.update(_tableName, values: values, where: _keyWhere, returning: ret);
     if (n > 0) {
       this.model.addAll(ret.firstRow);
     }
@@ -65,7 +65,7 @@ class TableModel<E> {
     ls.retainWhere((e) => e.value != null || true == columns?.contains(e.key.columnName));
     if (ls.isEmpty) return 0;
     Returning ret = Returning.ALL;
-    int id = _lite.insert(_tableName, values: ls, conflict: conflict, returning: ret);
+    int id = _executor.insert(_tableName, values: ls, conflict: conflict, returning: ret);
     if (ret.hasReturn) {
       this.model.addAll(ret.firstRow);
     }
@@ -78,7 +78,7 @@ class TableModel<E> {
     ls.retainWhere((e) => e.value != null || true == columns?.contains(e.key.columnName));
     if (ls.isEmpty) return 0;
     Returning ret = Returning.ALL;
-    int id = _lite.upsert(_tableName, values: ls, constraints: _proto.primaryKeys, returning: ret);
+    int id = _executor.upsert(_tableName, values: ls, constraints: _proto.primaryKeys, returning: ret);
     if (ret.hasReturn) {
       this.model.addAll(ret.firstRow);
     }

@@ -1,4 +1,4 @@
 library;
 
-export 'src/postgres/adapter.dart';
 export 'src/sql.dart';
+export 'src/sqlite/sqlite.dart';

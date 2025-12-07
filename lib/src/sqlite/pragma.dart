@@ -1,4 +1,4 @@
-part of 'sql.dart';
+part of 'sqlite.dart';
 
 typedef LiteTableItem = ({String schema, String name, String type, int ncol, int wr, int strict});
 typedef LiteTableInfo = ({String name, int cid, String type, int notnull, String? dflt_value, int pk});

@@ -1,4 +1,4 @@
-part of '../sql.dart';
+part of 'sqlite.dart';
 
 /// Bare columns in an aggregate query
 /// distinct on
@@ -102,10 +102,7 @@ class LiteSQL {
     }
   }
 
-  /// liteSQL.migrate(Person.values)
-  void migrate<T extends TableColumn<T>>(List<T> fields) {
-    _migrateEnumTable(this, fields);
-  }
+
 
   List<SqliteTableInfo> tableInfo(String tableName) {
     String sql = "PRAGMA table_info(${tableName.escapeSQL})";

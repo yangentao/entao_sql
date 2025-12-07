@@ -11,7 +11,6 @@ extension ResultSetExt on ResultSet {
 
   List<T> listValues<T>({int col = 0}) => this.mapList((e) => e.columnAt(col));
 
-  AnyMap rowAt({required int index}) => this[index].mapSQL;
 
   AnyMap? firstRow() => this.firstOrNull?.mapSQL;
 

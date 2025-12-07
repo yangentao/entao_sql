@@ -4,42 +4,46 @@ part of 'sql.dart';
 class TableOf<M extends TableModel<E>, E extends TableColumn> {
   final M Function(AnyMap) creator;
   late final TableProto<E> proto = TableProto<E>();
-  late final LiteSQL lite = proto.liteSQL;
+  late final SQLExecutor executor = proto.executor;
   late final List<TableColumn> primaryKeys = proto.columns.filter((e) => e.proto.primaryKey);
 
   TableOf(this.creator);
 
   String get tableName => proto.name;
 
-  V? oneValue<V>({required Object column, Where? where, Object? groupBy, Object? having, Object? window, Object? orderBy}) {
-    return this.query(columns: [column], where: where, groupBy: groupBy, having: having, window: window, orderBy: orderBy, limit: 1).firstValue();
+  Future<V?> oneValue<V>({required Object column, Where? where, Object? groupBy, Object? having, Object? window, Object? orderBy}) async {
+    final r = await this.query(columns: [column], where: where, groupBy: groupBy, having: having, window: window, orderBy: orderBy, limit: 1);
+    return r.firstValue();
   }
 
-  List<V> listColumn<V>({required Object column, Where? where, Object? groupBy, Object? having, Object? window, Object? orderBy, int? limit, int? offset}) {
-    return query(columns: [column], where: where, groupBy: groupBy, having: having, window: window, orderBy: orderBy, limit: limit, offset: offset).listValues();
+  Future<List<V>> listColumn<V>({required Object column, Where? where, Object? groupBy, Object? having, Object? window, Object? orderBy, int? limit, int? offset}) async {
+    final r = await query(columns: [column], where: where, groupBy: groupBy, having: having, window: window, orderBy: orderBy, limit: limit, offset: offset);
+    return r.listValues();
   }
 
   /// xx(key: 1, ...)
   /// xx(key: [1,name],...)
   /// support union primary key(s)
-  M? oneBy({required Object key, Object? groupBy, Object? having, Object? window, Object? orderBy}) {
-    return oneModel(where: _keyWhere(key), groupBy: groupBy, having: having, window: window, orderBy: orderBy);
+  Future<M?> oneBy({required Object key, Object? groupBy, Object? having, Object? window, Object? orderBy}) async {
+    return await oneModel(where: _keyWhere(key), groupBy: groupBy, having: having, window: window, orderBy: orderBy);
   }
 
-  M? oneModel({Where? where, Object? groupBy, Object? having, Object? window, Object? orderBy}) {
-    return listModel(where: where, groupBy: groupBy, having: having, window: window, orderBy: orderBy, limit: 1).firstOrNull;
+  Future<M?> oneModel({Where? where, Object? groupBy, Object? having, Object? window, Object? orderBy}) async {
+    final ls = await listModel(where: where, groupBy: groupBy, having: having, window: window, orderBy: orderBy, limit: 1);
+    return ls.firstOrNull;
   }
 
-  List<M> listModel({Where? where, Object? groupBy, Object? having, Object? window, Object? orderBy, int? limit, int? offset}) {
-    return this.query(where: where, groupBy: groupBy, having: having, window: window, orderBy: orderBy, limit: limit, offset: offset).listModels(creator);
+  Future<List<M>> listModel({Where? where, Object? groupBy, Object? having, Object? window, Object? orderBy, int? limit, int? offset}) async {
+    final r = await this.query(where: where, groupBy: groupBy, having: having, window: window, orderBy: orderBy, limit: limit, offset: offset);
+    return r.listModels(creator);
   }
 
-  ResultSet query({List<Object>? columns, Where? where, Object? groupBy, Object? having, Object? window, Object? orderBy, int? limit, int? offset}) {
-    return lite.query(columns ?? [], from: tableName, where: where, groupBy: groupBy, having: having, window: window, orderBy: orderBy, limit: limit, offset: offset);
+  Future<QueryResult> query({List<Object>? columns, Where? where, Object? groupBy, Object? having, Object? window, Object? orderBy, int? limit, int? offset}) async {
+    return executor.query(columns ?? [], from: tableName, where: where, groupBy: groupBy, having: having, window: window, orderBy: orderBy, limit: limit, offset: offset);
   }
 
   int delete({required Where where, Returning? returning}) {
-    return lite.delete(tableName, where: where, returning: returning);
+    return executor.delete(tableName, where: where, returning: returning);
   }
 
   /// xx(key: 1, ...)
@@ -50,28 +54,28 @@ class TableOf<M extends TableModel<E>, E extends TableColumn> {
   }
 
   int update({required List<ColumnValue> values, required Where where, Returning? returning}) {
-    return lite.update(tableName, values: values, where: where, returning: returning);
+    return executor.update(tableName, values: values, where: where, returning: returning);
   }
 
   /// xx(key: 1, ...)
   /// xx(key: [1,name],...)
   /// support union primary key(s)
   int updateBy({required Object key, required List<ColumnValue> values, Returning? returning}) {
-    return lite.update(tableName, values: values, where: _keyWhere(key), returning: returning);
+    return executor.update(tableName, values: values, where: _keyWhere(key), returning: returning);
   }
 
   int upsert({required List<ColumnValue> values, Returning? returning}) {
-    return lite.upsert(tableName, values: values, constraints: primaryKeys, returning: returning);
+    return executor.upsert(tableName, values: values, constraints: primaryKeys, returning: returning);
   }
 
   int insert({required List<ColumnValue> values, InsertOption? conflict, Returning? returning}) {
     if (values.isEmpty) return 0;
-    return lite.insert(tableName, values: values, conflict: conflict, returning: returning);
+    return executor.insert(tableName, values: values, conflict: conflict, returning: returning);
   }
 
   List<int> insertAll({required List<List<ColumnValue>> rows, InsertOption? conflict, Returning? returning}) {
     if (rows.isEmpty) return [];
-    return lite.insertAll(tableName, rows: rows, conflict: conflict, returning: returning);
+    return executor.insertAll(tableName, rows: rows, conflict: conflict, returning: returning);
   }
 
   int save(M? item, {bool returning = true}) {
@@ -100,7 +104,7 @@ class TableOf<M extends TableModel<E>, E extends TableColumn> {
   Where _keyWhere(Object value) => _keyEQ(value: value, keys: primaryKeys);
 
   void dump() {
-    lite.dumpTable(tableName);
+    executor.dumpTable(tableName);
   }
 }
 

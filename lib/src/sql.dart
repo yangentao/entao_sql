@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:core';
-import 'dart:ffi' as ffi;
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -10,16 +9,12 @@ import 'package:entao_dutil/entao_dutil.dart';
 import 'package:entao_log/entao_log.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-import 'sqlite/sqlite3_ffi.dart' as xsql;
-
-part 'executor_ext.dart';
 part 'ResultSetEx.dart';
 part 'SpaceBuffer.dart';
 part 'TableColumn.dart';
 part 'TableModel.dart';
 part 'TableOf.dart';
 part 'TableProto.dart';
-part 'query_result.dart';
 part 'clause/clauses.dart';
 part 'clause/express.dart';
 part 'clause/ext.dart';
@@ -29,10 +24,11 @@ part 'clause/joins.dart';
 part 'clause/where.dart';
 part 'configs.dart';
 part 'executor.dart';
-part 'pragma.dart';
-part 'sql_utils.dart';
-part 'sqlite/LiteSQL.dart';
+part 'executor_ext.dart';
+part 'query_result.dart';
 part 'query_result_ext.dart';
+part 'sql_utils.dart';
+
 typedef FutureCallback = Future<void> Function();
 typedef FutureOrCallback = FutureOr<void> Function();
 

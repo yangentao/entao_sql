@@ -4,10 +4,10 @@ class TableProto<E extends TableColumn> {
   final String name;
   final List<TableColumn<E>> columns;
   final String nameSQL;
-  final LiteSQL liteSQL;
+  final SQLExecutor executor;
   late final List<TableColumn<E>> primaryKeys = columns.filter((e) => e.proto.primaryKey);
 
-  TableProto._(this.name, this.columns, {required this.liteSQL}) : nameSQL = name.escapeSQL {
+  TableProto._(this.name, this.columns, {required this.executor}) : nameSQL = name.escapeSQL {
     for (var e in columns) {
       e.tableProto = this;
     }
@@ -48,46 +48,46 @@ extension on Type {
   TableProto get proto => TableProto.of(this);
 }
 
-void _migrateEnumTable<T extends TableColumn<T>>(LiteSQL lite, List<T> fields) {
+void _migrateEnumTable<T extends TableColumn<T>>(SQLExecutor executor, List<T> fields) {
   assert(fields.isNotEmpty);
   if (TableProto.isMigrated<T>()) return;
-  TableProto<T> tab = TableProto<T>._(fields.first.tableName, fields, liteSQL: lite);
-  _migrateTable(lite, tab.name, tab.columns);
+  TableProto<T> tab = TableProto<T>._(fields.first.tableName, fields, executor: executor);
+  _migrateTable(executor, tab.name, tab.columns);
 }
 
-void _migrateTable(LiteSQL lite, String tableName, List<TableColumn> fields) {
-  if (!lite.existTable(tableName)) {
-    _createTable(lite, tableName, fields);
+void _migrateTable(SQLExecutor executor, String tableName, List<TableColumn> fields) {
+  if (!executor.existTable(tableName)) {
+    _createTable(executor, tableName, fields);
     return;
   }
 
-  List<SqliteTableInfo> cols = lite.tableInfo(tableName);
+  List<SqliteTableInfo> cols = executor.tableInfo(tableName);
   Set<String> colSet = cols.map((e) => e.name).toSet();
   for (TableColumn f in fields) {
     if (!colSet.contains(f.columnName)) {
-      _addColumn(lite, tableName, f);
+      _addColumn(executor, tableName, f);
     }
   }
   Set<String> idxSet = {};
-  List<LiteIndexItem> idxList = lite.PRAGMA.index_list(tableName);
+  List<LiteIndexItem> idxList = executor.PRAGMA.index_list(tableName);
   for (LiteIndexItem a in idxList) {
-    List<LiteIndexInfo> ls = lite.PRAGMA.index_info(a.name);
+    List<LiteIndexInfo> ls = executor.PRAGMA.index_info(a.name);
     idxSet.addAll(ls.map((e) => e.name));
   }
   for (TableColumn f in fields) {
     if (f.proto.primaryKey || f.proto.unique || notBlank(f.proto.uniqueName)) continue;
     if (f.proto.index && !idxSet.contains(f.columnName)) {
-      lite.createIndex(tableName, [f.columnName]);
+      executor.createIndex(tableName, [f.columnName]);
     }
   }
 }
 
-void _addColumn(LiteSQL lite, String table, TableColumn field) {
+void _addColumn(SQLExecutor executor, String table, TableColumn field) {
   String sql = "ALTER TABLE ${table.escapeSQL} ADD COLUMN ${field.defineField(false)}";
-  lite.execute(sql);
+  executor.execute(sql);
 }
 
-void _createTable(LiteSQL lite, String table, List<TableColumn> fields, {List<String>? constraints, List<String>? options, bool notExist = true}) {
+Future<void> _createTable(SQLExecutor executor, String table, List<TableColumn> fields, {List<String>? constraints, List<String>? options, bool notExist = true}) async {
   ListString ls = [];
   if (notExist) {
     ls << "CREATE TABLE IF NOT EXISTS ${table.escapeSQL} (";
@@ -122,14 +122,14 @@ void _createTable(LiteSQL lite, String table, List<TableColumn> fields, {List<St
   }
 
   String sql = ls.join("\n");
-  lite.execute(sql);
+  await executor.execute(sql);
 
   for (var f in fields) {
     if (f.proto.primaryKey || f.proto.unique || notBlank(f.proto.uniqueName)) {
       continue;
     }
     if (f.proto.index) {
-      lite.createIndex(table, [f.columnName]);
+      await executor.createIndex(table, [f.columnName]);
     }
   }
 }

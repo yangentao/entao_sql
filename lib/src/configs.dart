@@ -50,16 +50,16 @@ class MConfigs extends TableModel<Configs> {
     table.upsert(values: [Configs.name >> name, Configs.fValue >> value]);
   }
 
-  static String? getString(String name) {
-    return table.oneValue(column: Configs.sValue, where: Configs.name.EQ(name));
+  static Future<String?> getString(String name) async {
+    return await table.oneValue(column: Configs.sValue, where: Configs.name.EQ(name));
   }
 
-  static int? getInt(String name) {
-    return table.oneValue(column: Configs.nValue, where: Configs.name.EQ(name));
+  static Future<int?> getInt(String name) async {
+    return await table.oneValue(column: Configs.nValue, where: Configs.name.EQ(name));
   }
 
-  static double? getDouble(String name) {
-    return table.oneValue(column: Configs.fValue, where: Configs.name.EQ(name));
+  static Future<double?> getDouble(String name) async {
+    return await table.oneValue(column: Configs.fValue, where: Configs.name.EQ(name));
   }
 
   static final table = TableOf(MConfigs.new);
