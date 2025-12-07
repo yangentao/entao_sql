@@ -1,17 +1,19 @@
 import 'dart:async';
 
-import 'package:entao_sql/sqlite.dart';
 import 'package:println/println.dart';
 
 void main() async {
-  FutureOrCallback a = blank;
-  if (a case FutureCallback b) {
-    println("async");
-    await b();
-  } else {
-    println("sync");
-    a();
-  }
+  Stream<int> s = Stream.fromIterable([1, 2, 3]);
+  println("multi? ", s.isBroadcast);
+  s.length.then((n) {
+    println("length: ", n);
+  });
+  s.last.then((v){
+    println("last: ",v);
+  });
+  s.listen((v) {
+    println("value: ", v);
+  });
 }
 
 Future<void> hello() async {

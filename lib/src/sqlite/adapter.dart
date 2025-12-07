@@ -11,6 +11,17 @@ class SQliteExecutor extends SQLExecutor {
   SQliteExecutor(this.lite);
 
   @override
+  Stream<RowData> queryStream(String sql, {AnyList? parameters}) async* {
+    PreparedStatement ps = lite.prepareSQL(sql);
+    IteratingCursor ic = ps.selectCursor(parameters ?? const []);
+    ResultMeta meta = ic.meta;
+    while (ic.moveNext()) {
+      yield RowData(ic.current.values, meta: meta);
+    }
+    ps.close();
+  }
+
+  @override
   QueryResult query(String sql, {AnyList? parameters}) {
     ResultSet rs = lite.rawQuery(sql, parameters);
     return QueryResult(rs.rows, meta: rs.meta, rawResult: rs);
@@ -38,6 +49,6 @@ class SQliteExecutor extends SQLExecutor {
   }
 }
 
-extension ResultMetaSQLite on ResultSet {
+extension ResultMetaSQLite on Cursor {
   ResultMeta get meta => ResultMeta(this.columnNames.mapIndex((i, e) => ColumnMeta(label: e, typeId: 0)));
 }

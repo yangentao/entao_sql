@@ -18,6 +18,20 @@ class PostgresExecutor<T> extends SQLExecutor {
   PostgresExecutor(this.executor, {this.timeout, this.queryMode, this.transactionSettings});
 
   @override
+  Future<Stream<RowData>> queryStream(String sql, {AnyList? parameters}) async {
+    return executor.run((se) async {
+      Statement st = await se.prepare(sql);
+      Stream<RowData> s = st.bind(parameters).map((r) => RowData(r, meta: r.schema.meta));
+      StreamController<RowData> controller = StreamController(onCancel: () => st.dispose());
+      s.listen(controller.add, onDone: () {
+        controller.close();
+        st.dispose();
+      }, onError: controller.addError);
+      return controller.stream;
+    });
+  }
+
+  @override
   Future<QueryResult> query(String sql, {AnyList? parameters}) async {
     if (_session case Session se) {
       Result r = await se.execute(sql, parameters: parameters, timeout: timeout, queryMode: queryMode);
@@ -55,5 +69,9 @@ class PostgresExecutor<T> extends SQLExecutor {
 }
 
 extension ResultMetaPGExt on Result {
-  ResultMeta get meta => ResultMeta(this.schema.columns.mapIndex((i, e) => ColumnMeta(label: e.columnName ?? "[$i]", typeId: e.typeOid)));
+  ResultMeta get meta => this.schema.meta;
+}
+
+extension ResultMetaResultSchemaExt on ResultSchema {
+  ResultMeta get meta => ResultMeta(this.columns.mapIndex((i, e) => ColumnMeta(label: e.columnName ?? "[$i]", typeId: e.typeOid)));
 }

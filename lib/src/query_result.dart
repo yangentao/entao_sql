@@ -29,9 +29,8 @@ class ColumnMeta {
 
 //------------------
 class RowData extends UnmodifiableListView<Object?> {
-  RowData(super.source);
+  final ResultMeta meta;
+
+  RowData(super.source, {required this.meta});
 }
 
-abstract interface class CursorResult {
-  Iterator<RowData> get iterator;
-}
