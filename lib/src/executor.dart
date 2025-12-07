@@ -1,6 +1,6 @@
 part of 'sql.dart';
 
-abstract class SQLExecutor {
+abstract mixin class SQLExecutor {
   FutureOr<void> execute(String sql, {AnyList? parameters});
 
   FutureOr<QueryResult> query(String sql, {AnyList? parameters});

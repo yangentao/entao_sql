@@ -19,7 +19,7 @@ class PostgresExecutor<T> extends SQLExecutor {
 
   @override
   Future<Stream<RowData>> queryStream(String sql, {AnyList? parameters}) async {
-    return executor.run((se) async {
+    if (_session case Session se) {
       Statement st = await se.prepare(sql);
       Stream<RowData> s = st.bind(parameters).map((r) => RowData(r, meta: r.schema.meta));
       StreamController<RowData> controller = StreamController(onCancel: () => st.dispose());
@@ -28,7 +28,18 @@ class PostgresExecutor<T> extends SQLExecutor {
         st.dispose();
       }, onError: controller.addError);
       return controller.stream;
-    });
+    } else {
+      return executor.run((se) async {
+        Statement st = await se.prepare(sql);
+        Stream<RowData> s = st.bind(parameters).map((r) => RowData(r, meta: r.schema.meta));
+        StreamController<RowData> controller = StreamController(onCancel: () => st.dispose());
+        s.listen(controller.add, onDone: () {
+          controller.close();
+          st.dispose();
+        }, onError: controller.addError);
+        return controller.stream;
+      });
+    }
   }
 
   @override
@@ -60,7 +71,11 @@ class PostgresExecutor<T> extends SQLExecutor {
     executor.runTx((session) async {
       _session = session;
       try {
-        await callback();
+        if (callback is FutureCallback) {
+          await callback();
+        } else {
+          callback();
+        }
       } finally {
         _session = null;
       }
