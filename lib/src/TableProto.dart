@@ -86,12 +86,12 @@ Future<void> _migrateTable(SQLExecutor executor, String tableName, List<TableCol
 Future<void> _createIndex(SQLExecutor executor, String table, List<String> fields) async {
   String idxName = makeIndexName(table, fields);
   String sql = "CREATE INDEX IF NOT EXISTS $idxName ON ${table.escapeSQL} (${fields.map((e) => e.escapeSQL).join(",")})";
-  await executor.execute(sql);
+  await executor.rawQuery(sql);
 }
 
 Future<void> _addColumn(SQLExecutor executor, String table, TableColumn field) async {
   String sql = "ALTER TABLE ${table.escapeSQL} ADD COLUMN ${field.defineField(false)}";
-  await executor.execute(sql);
+  await executor.rawQuery(sql);
 }
 
 Future<void> _createTable(SQLExecutor executor, String table, List<TableColumn> fields, {List<String>? constraints, List<String>? options}) async {
@@ -125,7 +125,7 @@ Future<void> _createTable(SQLExecutor executor, String table, List<TableColumn> 
   }
 
   String sql = ls.join("\n");
-  await executor.execute(sql);
+  await executor.rawQuery(sql);
 
   for (var f in fields) {
     if (f.proto.primaryKey || f.proto.unique || notBlank(f.proto.uniqueName)) {

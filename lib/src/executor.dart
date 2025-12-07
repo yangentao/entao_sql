@@ -1,13 +1,11 @@
 part of 'sql.dart';
 
 abstract interface class SQLExecutor {
-  FutureOr<void> execute(String sql, [AnyList? parameters]);
-
-  FutureOr<List<QueryResult>> executeMulti(String sql, Iterable<AnyList> parametersList);
-
   FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]);
 
-  FutureOr<Stream<RowData>> queryStream(String sql, [AnyList? parameters]);
+  FutureOr<List<QueryResult>> prepareQuery(String sql, Iterable<AnyList> parametersList);
+
+  FutureOr<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]);
 
   FutureOr<bool> tableExists(String tableName, [String? schema]);
 
@@ -23,7 +21,7 @@ abstract interface class SQLExecutorTx implements SQLExecutor {
 }
 
 extension ExpressExecutorExt<T extends Express> on T {
-  Future<QueryResult> queryX(SQLExecutor e) async => await e.rawQuery(this.sql, args);
+  Future<QueryResult> query(SQLExecutor e) async => await e.rawQuery(this.sql, args);
 }
 
 String makeIndexName(String table, List<String> fields) {

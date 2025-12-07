@@ -27,7 +27,7 @@ extension LiteSqlInsertExt on SQLExecutor {
       if (offset != null) e = e.OFFSET(offset);
     }
     e.addArgs(args);
-    return e.queryX(this);
+    return e.query(this);
   }
 
   Future<RowData?> insert(Object table, {required Iterable<ColumnValue> values, Returning? returning}) async {
@@ -72,7 +72,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     returning ??= Returning.ALL;
     SpaceBuffer buf = _insertBuffer(table, columns);
     buf << returning.clause;
-    List<QueryResult> ls = await this.executeMulti(buf.toString(), rows);
+    List<QueryResult> ls = await this.prepareQuery(buf.toString(), rows);
     return ls.mapList((e) => e.firstRowData!);
   }
 
@@ -157,7 +157,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     SpaceBuffer buf = _upsertBuffer(table, columnNames, constraints: constraintNames, otherColumns: otherNames);
     buf << returning.clause;
     final argss = rows.map((row) => [...row, ...otherNames.mapList((e) => row[columnNames.indexOf(e)])]);
-    List<QueryResult> ls = await executeMulti(buf.toString(), argss);
+    List<QueryResult> ls = await prepareQuery(buf.toString(), argss);
     return ls.mapList((e) => e.firstRowData!);
   }
 

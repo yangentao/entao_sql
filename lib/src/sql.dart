@@ -47,7 +47,6 @@ final class Returning {
   static Returning get ALL => Returning(const ["*"]);
 }
 
-
 class SQLException implements Exception {
   String message;
   StackTrace stackTrace;
@@ -85,6 +84,18 @@ void _setModelValue(Object model, String key, dynamic value) {
   } else {
     errorSQL("set value failed, unknown container:$model, tableColumn:$key.");
   }
+}
+
+T? _checkNum<T>(dynamic v) {
+  if (v == null) return null;
+  if (v is num) {
+    if (T == int) {
+      return v.toInt() as T;
+    } else if (T == double) {
+      return v.toDouble() as T;
+    }
+  }
+  return v;
 }
 
 extension on ColumnValue {

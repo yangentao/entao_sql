@@ -6,7 +6,7 @@ class SQliteExecutor implements SQLExecutorTx {
   SQliteExecutor(this.lite);
 
   @override
-  Stream<RowData> queryStream(String sql, [AnyList? parameters]) async* {
+  Stream<RowData> streamQuery(String sql, [AnyList? parameters]) async* {
     PreparedStatement ps = lite.prepareSQL(sql);
     IteratingCursor ic = ps.selectCursor(parameters ?? const []);
     ResultMeta meta = ic.meta;
@@ -22,12 +22,7 @@ class SQliteExecutor implements SQLExecutorTx {
   }
 
   @override
-  void execute(String sql, [AnyList? parameters]) {
-    lite.execute(sql, parameters);
-  }
-
-  @override
-  List<QueryResult> executeMulti(String sql, Iterable<AnyList> parametersList) {
+  List<QueryResult> prepareQuery(String sql, Iterable<AnyList> parametersList) {
     List<QueryResult> ls = [];
     final st = lite.prepareSQL(sql);
     try {
