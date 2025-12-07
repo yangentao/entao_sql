@@ -5,7 +5,9 @@ class Express {
 
   final AnyList args;
 
-  Express(String express, {AnyList? args}) : buffer = SpaceBuffer(express), this.args = args ?? [];
+  Express(String express, {AnyList? args})
+      : buffer = SpaceBuffer(express),
+        this.args = args ?? [];
 
   String get sql => buffer.toString();
 
@@ -13,9 +15,7 @@ class Express {
 
   bool get isNotEmpty => buffer.isNotEmpty;
 
-  Express get braced => Express("($sql)", args: this.args);
 
-  ResultSet query(LiteSQL lite) => lite.rawQuery(this.sql, args);
 
   @override
   String toString() {
@@ -76,6 +76,13 @@ class Express {
 
   Express addArg(Object? arg) {
     this.args.add(arg);
+    return this;
+  }
+}
+
+extension ExpressTypedExt<T extends Express> on T {
+  T get braced {
+    this.buffer.braced();
     return this;
   }
 }

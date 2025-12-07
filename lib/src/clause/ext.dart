@@ -1,7 +1,6 @@
 part of '../sql.dart';
 
 extension StringExpressExt on String {
-  String get braced => "($this)";
 
   Express get express => Express(this);
 
@@ -28,13 +27,4 @@ extension TableColumnExpresExt<T extends TableColumn<T>> on TableColumn<T> {
   String get DESC => "$fullname DESC";
 }
 
-extension on Type {
-  TableProto get proto => TableProto.of(this);
-}
 
-extension ListJoinMapEx<T> on List<T> {
-  String joinMap(String sep, [String Function(T)? tranform]) {
-    if (tranform == null) return join(sep);
-    return this.map(tranform).join(sep);
-  }
-}

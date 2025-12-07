@@ -9,3 +9,7 @@ abstract mixin class SQLExecutor {
 
   FutureOr<void> transaction(FutureOr<void> Function() callback);
 }
+
+extension ExpressExecutorExt<T extends Express> on T {
+  ResultSet query(LiteSQL lite) => lite.rawQuery(this.sql, args);
+}

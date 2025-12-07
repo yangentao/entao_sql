@@ -5,9 +5,6 @@ class Where extends Express {
 
   Where.strip(Express express) : super(express.sql, args: express.args);
 
-  @override
-  Where get braced => Where("($sql)", args: this.args);
-
   Where AND(Where w) {
     return _WhereAnd(this, w);
   }

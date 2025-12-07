@@ -1,5 +1,12 @@
 part of 'sql.dart';
 
+extension ListJoinMapEx<T> on List<T> {
+  String joinMap(String sep, [String Function(T)? tranform]) {
+    if (tranform == null) return join(sep);
+    return this.map(tranform).join(sep);
+  }
+}
+
 // https://sqlite.org/lang_keywords.html
 extension StringSQLExt on String {
   String get braced {

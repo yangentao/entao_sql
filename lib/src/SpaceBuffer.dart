@@ -3,6 +3,15 @@ part of 'sql.dart';
 extension type SpaceBuffer.buf(StringBuffer buffer) implements StringBuffer {
   SpaceBuffer([String s = ""]) : this.buf(StringBuffer(s));
 
+  SpaceBuffer braced() {
+    String s = buffer.toString();
+    buffer.clear();
+    buffer.write("(");
+    buffer.write(s);
+    buffer.write(")");
+    return this;
+  }
+
   SpaceBuffer get space {
     buffer.write(" ");
     return this;
