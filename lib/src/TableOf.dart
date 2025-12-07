@@ -68,14 +68,14 @@ class TableOf<M extends TableModel<E>, E extends TableColumn> {
     return await executor.upsert(tableName, values: values, constraints: primaryKeys, returning: returning);
   }
 
-  Future<RowData?> insert({required List<ColumnValue> values, InsertOption? conflict, Returning? returning}) async {
+  Future<RowData?> insert({required List<ColumnValue> values, Returning? returning}) async {
     if (values.isEmpty) return null;
-    return await executor.insert(tableName, values: values, conflict: conflict, returning: returning);
+    return await executor.insert(tableName, values: values, returning: returning);
   }
 
-  Future<List<RowData>> insertAll({required List<List<ColumnValue>> rows, InsertOption? conflict, Returning? returning}) async {
+  Future<List<RowData>> insertAll({required List<List<ColumnValue>> rows, Returning? returning}) async {
     if (rows.isEmpty) return const [];
-    return await executor.insertAll(tableName, rows: rows, conflict: conflict, returning: returning);
+    return await executor.insertAll(tableName, rows: rows, returning: returning);
   }
 
   Future<RowData?> save(M? item) async {

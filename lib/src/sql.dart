@@ -39,32 +39,14 @@ typedef ColumnValue<T extends Object> = MapEntry<T, dynamic>;
 
 final class Returning {
   final List<String> columns;
-  List<AnyMap> returnRows = [];
 
-  Returning(Iterable<Object> columns) : columns = columns.mapList((e) => _columnNameOf(e)) {
-    assert(columns.isNotEmpty);
-  }
-
-  bool get hasReturn => returnRows.isNotEmpty;
-
-  AnyMap get firstRow => returnRows.first;
+  Returning([Iterable<Object> columns = const []]) : columns = columns.mapList((e) => _columnNameOf(e));
 
   String get clause => " RETURNING ${columns.join(", ") | '*'}";
 
   static Returning get ALL => Returning(const ["*"]);
 }
 
-enum InsertOption {
-  abort("ABORT"),
-  fail("FAIL"),
-  ignore("IGNORE"),
-  replace("REPLACE"),
-  rollback("ROLLBACK");
-
-  const InsertOption(this.conflict);
-
-  final String conflict;
-}
 
 class SQLException implements Exception {
   String message;
@@ -103,4 +85,29 @@ void _setModelValue(Object model, String key, dynamic value) {
   } else {
     errorSQL("set value failed, unknown container:$model, tableColumn:$key.");
   }
+}
+
+extension on ColumnValue {
+  String get keyName => _columnNameOf(key);
+}
+
+String _columnNameOf(Object col) {
+  switch (col) {
+    case String s:
+      return s;
+    case TableColumn c:
+      return c.columnName;
+  }
+  errorSQL("Unknown key: $col ");
+}
+
+String _tableNameOf(Object table) {
+  switch (table) {
+    case String s:
+      return s;
+    case Type t:
+      if (t == Object) errorSQL("NO table name");
+      return "$t";
+  }
+  errorSQL("Unknown table: $table ");
 }

@@ -51,6 +51,16 @@ Express EXCEPT(Express left, Express right) {
 }
 
 extension ExpressExt on Express {
+  Express SELECT(AnyList columns) {
+    this << "SELECT";
+    if (columns.isEmpty) {
+      this << "*";
+    } else {
+      this << columns;
+    }
+    return this;
+  }
+
   // String OR Express OR Type
   Express FROM(Object express) {
     this << "FROM";

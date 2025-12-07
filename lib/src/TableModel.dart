@@ -61,12 +61,12 @@ class TableModel<E> {
   }
 
   // only nonull field will be insert, or 'columns' contains it
-  Future<RowData?> insert({List<Object>? columns, List<Object>? excludes, InsertOption? conflict}) async {
+  Future<RowData?> insert({List<Object>? columns, List<Object>? excludes}) async {
     List<MapEntry<TableColumn, dynamic>> ls = _fieldValues(columns: columns, excludes: excludes);
     ls.retainWhere((e) => e.value != null || true == columns?.contains(e.key.columnName));
     if (ls.isEmpty) return null;
     Returning ret = Returning.ALL;
-    RowData? row = await _executor.insert(_tableName, values: ls, conflict: conflict, returning: ret);
+    RowData? row = await _executor.insert(_tableName, values: ls, returning: ret);
     if (row != null) {
       this.model.addAll(row.toMap());
     }
@@ -74,7 +74,7 @@ class TableModel<E> {
   }
 
   // only nonull field will be insert, or 'columns' contains it
-  Future<RowData?> upsert({List<Object>? columns, List<Object>? excludes, InsertOption? conflict}) async {
+  Future<RowData?> upsert({List<Object>? columns, List<Object>? excludes}) async {
     List<MapEntry<TableColumn, dynamic>> ls = _fieldValues(columns: columns, excludes: excludes);
     ls.retainWhere((e) => e.value != null || true == columns?.contains(e.key.columnName));
     if (ls.isEmpty) return null;

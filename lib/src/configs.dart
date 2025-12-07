@@ -34,20 +34,20 @@ class MConfigs extends TableModel<Configs> {
 
   set fValue(double? value) => Configs.fValue.set(this, value);
 
-  static void remove(String name) {
-    table.deleteBy(key: name);
+  static void remove(String name) async {
+    await table.deleteBy(key: name);
   }
 
-  static void putString(String name, String value) {
-    table.upsert(values: [Configs.name >> name, Configs.sValue >> value]);
+  static void putString(String name, String value) async {
+    await table.upsert(values: [Configs.name >> name, Configs.sValue >> value]);
   }
 
-  static void putInt(String name, int value) {
-    table.upsert(values: [Configs.name >> name, Configs.nValue >> value]);
+  static void putInt(String name, int value) async {
+    await table.upsert(values: [Configs.name >> name, Configs.nValue >> value]);
   }
 
-  static void putDouble(String name, double value) {
-    table.upsert(values: [Configs.name >> name, Configs.fValue >> value]);
+  static void putDouble(String name, double value) async {
+    await table.upsert(values: [Configs.name >> name, Configs.fValue >> value]);
   }
 
   static Future<String?> getString(String name) async {

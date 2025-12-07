@@ -30,46 +30,42 @@ extension LiteSqlInsertExt on SQLExecutor {
     return e.queryX(this);
   }
 
-  Future<RowData?> insert(Object table, {required Iterable<ColumnValue> values, InsertOption? conflict, Returning? returning}) async {
+  Future<RowData?> insert(Object table, {required Iterable<ColumnValue> values, Returning? returning}) async {
     assert(values.isNotEmpty);
-    return await insertValues(table, columns: values.map((e) => e.key), values: values.map((e) => e.value), conflict: conflict, returning: returning);
+    return await insertValues(table, columns: values.map((e) => e.key), values: values.map((e) => e.value), returning: returning);
   }
 
-  Future<RowData?> insertMap(Object table, {required Map<Object, dynamic> values, InsertOption? conflict, Returning? returning}) async {
-    return await insert(table, values: values.entries, conflict: conflict, returning: returning);
+  Future<RowData?> insertMap(Object table, {required Map<Object, dynamic> values, Returning? returning}) async {
+    return await insert(table, values: values.entries, returning: returning);
   }
 
-  Future<RowData?> insertValues(Object table,
-      {required Iterable<Object> columns, required Iterable<dynamic> values, InsertOption? conflict, Returning? returning}) async {
+  Future<RowData?> insertValues(Object table, {required Iterable<Object> columns, required Iterable<dynamic> values, Returning? returning}) async {
     assert(columns.isNotEmpty && values.isNotEmpty && columns.length == values.length);
     returning ??= Returning.ALL;
     SpaceBuffer buf = _insertBuffer(table, columns);
     buf << returning.clause;
     QueryResult rs = await this.rawQuery(buf.toString(), values.toList());
-    returning.returnRows.addAll(rs.listRows());
     return rs.firstRowData;
   }
 
-  Future<List<RowData>> insertAll(Object table, {required Iterable<List<ColumnValue>> rows, InsertOption? conflict, Returning? returning}) async {
+  Future<List<RowData>> insertAll(Object table, {required Iterable<List<ColumnValue>> rows, Returning? returning}) async {
     assert(rows.isNotEmpty);
     return await insertAllValues(
       table,
       columns: rows.first.map((e) => e.key),
       rows: rows.map((row) => row.mapList((e) => e.value)),
-      conflict: conflict,
       returning: returning,
     );
   }
 
-  Future<List<RowData>> insertAllMap(Object table, {required Iterable<Map<Object, dynamic>> rows, InsertOption? conflict, Returning? returning}) async {
-    return await insertAll(table, rows: rows.map((e) => e.entries.toList()), conflict: conflict, returning: returning);
+  Future<List<RowData>> insertAllMap(Object table, {required Iterable<Map<Object, dynamic>> rows, Returning? returning}) async {
+    return await insertAll(table, rows: rows.map((e) => e.entries.toList()), returning: returning);
   }
 
   Future<List<RowData>> insertAllValues(
     Object table, {
     required Iterable<Object> columns,
     required Iterable<AnyList> rows,
-    InsertOption? conflict,
     Returning? returning,
   }) async {
     assert(columns.isNotEmpty && rows.isNotEmpty);
@@ -80,16 +76,13 @@ extension LiteSqlInsertExt on SQLExecutor {
     return ls.mapList((e) => e.firstRowData!);
   }
 
-  Future<RowData?> upsert(Object table,
-      {required Iterable<ColumnValue> values, required Iterable<Object> constraints, InsertOption? conflict, Returning? returning}) async {
+  Future<RowData?> upsert(Object table, {required Iterable<ColumnValue> values, required Iterable<Object> constraints, Returning? returning}) async {
     assert(values.isNotEmpty);
-    return await upsertValues(table,
-        columns: values.map((e) => e.key), constraints: constraints, values: values.map((e) => e.value), conflict: conflict, returning: returning);
+    return await upsertValues(table, columns: values.map((e) => e.key), constraints: constraints, values: values.map((e) => e.value), returning: returning);
   }
 
-  Future<RowData?> upsertMap(Object table,
-      {required Map<Object, dynamic> values, required Iterable<Object> constraints, InsertOption? conflict, Returning? returning}) async {
-    return await upsert(table, values: values.entries, constraints: constraints, conflict: conflict, returning: returning);
+  Future<RowData?> upsertMap(Object table, {required Map<Object, dynamic> values, required Iterable<Object> constraints, Returning? returning}) async {
+    return await upsert(table, values: values.entries, constraints: constraints, returning: returning);
   }
 
   Future<RowData?> upsertValues(
@@ -97,7 +90,6 @@ extension LiteSqlInsertExt on SQLExecutor {
     required Iterable<Object> columns,
     required Iterable<Object> constraints,
     required Iterable<dynamic> values,
-    InsertOption? conflict,
     Returning? returning,
   }) async {
     assert(columns.isNotEmpty && columns.length == values.length);
@@ -118,28 +110,25 @@ extension LiteSqlInsertExt on SQLExecutor {
     List<String> columnNames = columns.mapList((e) => _columnNameOf(e));
     List<String> constraintNames = constraints.mapList((e) => _columnNameOf(e));
     List<String> otherNames = columnNames.filter((e) => !constraintNames.contains(e));
-    SpaceBuffer buf = _upsertBuffer(table, columnNames, constraints: constraintNames, otherColumns: otherNames, conflict: conflict);
+    SpaceBuffer buf = _upsertBuffer(table, columnNames, constraints: constraintNames, otherColumns: otherNames);
     var argList = [...values, ...otherNames.mapList((e) => valueList[columnNames.indexOf(e)])];
     buf << returning.clause;
     QueryResult rs = await rawQuery(buf.toString(), argList);
     return rs.firstRowData;
   }
 
-  Future<List<RowData>> upsertAll(Object table,
-      {required List<List<ColumnValue>> rows, required Iterable<Object> constraints, InsertOption? conflict, Returning? returning}) async {
+  Future<List<RowData>> upsertAll(Object table, {required List<List<ColumnValue>> rows, required Iterable<Object> constraints, Returning? returning}) async {
     return await upsertAllValues(
       table,
       columns: rows.first.map((e) => e.key),
       constraints: constraints,
       rows: rows.mapList((e) => e.mapList((x) => x.value)),
-      conflict: conflict,
       returning: returning,
     );
   }
 
-  Future<List<RowData>> upsertAllMap(Object table,
-      {required List<Map<Object, dynamic>> rows, required Iterable<Object> constraints, InsertOption? conflict, Returning? returning}) async {
-    return await upsertAll(table, rows: rows.mapList((e) => e.entries.toList()), constraints: constraints, conflict: conflict, returning: returning);
+  Future<List<RowData>> upsertAllMap(Object table, {required List<Map<Object, dynamic>> rows, required Iterable<Object> constraints, Returning? returning}) async {
+    return await upsertAll(table, rows: rows.mapList((e) => e.entries.toList()), constraints: constraints, returning: returning);
   }
 
   Future<List<RowData>> upsertAllValues(
@@ -147,7 +136,6 @@ extension LiteSqlInsertExt on SQLExecutor {
     required Iterable<Object> columns,
     required Iterable<Object> constraints,
     required List<List<dynamic>> rows,
-    InsertOption? conflict,
     Returning? returning,
   }) async {
     assert(columns.isNotEmpty && rows.isNotEmpty && columns.length == rows[0].length);
@@ -166,7 +154,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     List<String> columnNames = columns.mapList((e) => _columnNameOf(e));
     List<String> constraintNames = constraints.mapList((e) => _columnNameOf(e));
     List<String> otherNames = columnNames.filter((e) => !constraintNames.contains(e));
-    SpaceBuffer buf = _upsertBuffer(table, columnNames, constraints: constraintNames, otherColumns: otherNames, conflict: conflict);
+    SpaceBuffer buf = _upsertBuffer(table, columnNames, constraints: constraintNames, otherColumns: otherNames);
     buf << returning.clause;
     final argss = rows.map((row) => [...row, ...otherNames.mapList((e) => row[columnNames.indexOf(e)])]);
     List<QueryResult> ls = await executeMulti(buf.toString(), argss);
@@ -220,41 +208,13 @@ extension LiteSqlInsertExt on SQLExecutor {
   }
 
   /// liteSQL.migrate(Person.values)
-  void register<T extends TableColumn<T>>(List<T> fields, {bool migrate = true }) {
+  void register<T extends TableColumn<T>>(List<T> fields, {bool migrate = true}) {
     _registerTable(this, fields, migrate: migrate);
   }
 }
 
-extension on ColumnValue {
-  String get keyName => _columnNameOf(key);
-}
-
-String _columnNameOf(Object col) {
-  switch (col) {
-    case String s:
-      return s;
-    case TableColumn c:
-      return c.columnName;
-  }
-  errorSQL("Unknown key: $col ");
-}
-
-String _tableNameOf(Object table) {
-  switch (table) {
-    case String s:
-      return s;
-    case Type t:
-      if (t == Object) errorSQL("NO table name");
-      return "$t";
-  }
-  errorSQL("Unknown table: $table ");
-}
-
-SpaceBuffer _insertBuffer(Object table, Iterable<Object> columns, {InsertOption? conflict}) {
+SpaceBuffer _insertBuffer(Object table, Iterable<Object> columns) {
   SpaceBuffer buf = SpaceBuffer("INSERT");
-  if (conflict != null) {
-    buf << "OR" << conflict.conflict;
-  }
   buf << "INTO" << _tableNameOf(table).escapeSQL;
   buf << "(";
   buf << columns.map((e) => _columnNameOf(e).escapeSQL).join(",");
@@ -269,13 +229,10 @@ SpaceBuffer _upsertBuffer(
   Iterable<String> columns, {
   required Iterable<String> constraints,
   required Iterable<String> otherColumns,
-  InsertOption? conflict,
 }) {
   // List<String> otherColumns = columns.filter((e) => !constraints.contains(e));
   SpaceBuffer buf = SpaceBuffer("INSERT");
-  if (conflict != null) {
-    buf << "OR" << conflict.conflict;
-  }
+
   buf << "INTO" << _tableNameOf(table).escapeSQL;
   buf << "(";
   buf << columns.map((e) => e.escapeSQL).join(",");
