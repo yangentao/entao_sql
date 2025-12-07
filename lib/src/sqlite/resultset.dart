@@ -1,4 +1,4 @@
-part of 'sql.dart';
+part of 'sqlite.dart';
 
 extension ResultSetExt on ResultSet {
   dynamic firstValue() => this.firstOrNull?.columnAt(0);
@@ -28,11 +28,5 @@ extension RowExt on Row {
     return map;
   }
 
-  dynamic get firstColumn {
-    return this.columnAt(0);
-  }
 
-  dynamic get secondColumn {
-    return this.columnAt(1);
-  }
 }

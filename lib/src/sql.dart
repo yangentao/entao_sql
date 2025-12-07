@@ -7,9 +7,7 @@ import 'dart:typed_data';
 
 import 'package:entao_dutil/entao_dutil.dart';
 import 'package:entao_log/entao_log.dart';
-import 'package:sqlite3/sqlite3.dart';
 
-part 'ResultSetEx.dart';
 part 'SpaceBuffer.dart';
 part 'TableColumn.dart';
 part 'TableModel.dart';
