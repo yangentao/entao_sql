@@ -7,6 +7,8 @@ class QueryResult extends UnmodifiableListView<List<Object?>> {
   int labelIndex(String label) => meta.labelIndex(label);
 
   QueryResult(super.source, {required this.meta, required this.rawResult});
+
+  List<AnyMap> listMap() => this.mapIndex((_, row)=> AnyMap.fromEntries(row.mapIndex((i, e) => MapEntry(meta.columns[i].label, e))));
 }
 
 class ResultMeta {
@@ -32,5 +34,8 @@ class RowData extends UnmodifiableListView<Object?> {
   final ResultMeta meta;
 
   RowData(super.source, {required this.meta});
-}
 
+  int labelIndex(String label) => meta.labelIndex(label);
+
+  AnyMap toMap() => AnyMap.fromEntries(this.mapIndex((i, e) => MapEntry(meta.columns[i].label, e)));
+}

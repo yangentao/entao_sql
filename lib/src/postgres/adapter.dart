@@ -41,20 +41,20 @@ class PgSessionExecutor implements SQLExecutor {
   PgSessionExecutor(this.session, {this.options});
 
   @override
-  Future<Stream<RowData>> queryStream(String sql, {AnyList? parameters}) async {
+  Future<Stream<RowData>> queryStream(String sql, [AnyList? parameters]) async {
     Statement st = await session.prepare(sql);
     Stream<RowData> s = st.bind(parameters).map((r) => RowData(r, meta: r.schema.meta));
     return s.whenComplete(() => st.dispose());
   }
 
   @override
-  Future<QueryResult> rawQuery(String sql, {AnyList? parameters, bool ignoreRows = false}) async {
+  Future<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
     Result r = await session.execute(sql, parameters: parameters, timeout: options?.timeout, queryMode: options?.queryMode);
     return r.queryResult;
   }
 
   @override
-  Future<void> execute(String sql, {AnyList? parameters}) async {
+  Future<void> execute(String sql, [AnyList? parameters]) async {
     await session.execute(sql, parameters: parameters, timeout: options?.timeout, ignoreRows: true, queryMode: options?.queryMode);
   }
 

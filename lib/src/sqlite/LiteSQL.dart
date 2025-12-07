@@ -1,5 +1,12 @@
 part of '../sql.dart';
 
+/// Bare columns in an aggregate query
+/// distinct on
+/// SELECT a, b, max(c) FROM tab1 GROUP BY a;
+/// min/max 在聚合查询时,  会返回包含min/max值的行.
+/// 利用这特特性, 可以实现postgresql distinct on 的特性
+/// https://sqlite.org/lang_select.html#bareagg
+/// https://sqlite.org/lang_select.html
 class LiteSQL {
   final Database database;
   final ffi.Pointer<ffi.Opaque> _nativeDatabase;

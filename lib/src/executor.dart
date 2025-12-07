@@ -1,13 +1,13 @@
 part of 'sql.dart';
 
 abstract interface class SQLExecutor {
-  FutureOr<void> execute(String sql, {AnyList? parameters});
+  FutureOr<void> execute(String sql, [AnyList? parameters]);
 
   FutureOr<void> executeMulti(String sql, List<AnyList> parametersList);
 
-  FutureOr<QueryResult> rawQuery(String sql, {AnyList? parameters, bool ignoreRows = false});
+  FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]);
 
-  FutureOr<Stream<RowData>> queryStream(String sql, {AnyList? parameters});
+  FutureOr<Stream<RowData>> queryStream(String sql, [AnyList? parameters]);
 }
 
 abstract interface class SQLExecutorTx implements SQLExecutor {
@@ -17,5 +17,5 @@ abstract interface class SQLExecutorTx implements SQLExecutor {
 extension ExpressExecutorExt<T extends Express> on T {
   ResultSet query(LiteSQL lite) => lite.rawQuery(this.sql, args);
 
-  Future<QueryResult> queryX(SQLExecutor e) async => await e.rawQuery(this.sql, parameters: args);
+  Future<QueryResult> queryX(SQLExecutor e) async => await e.rawQuery(this.sql, args);
 }

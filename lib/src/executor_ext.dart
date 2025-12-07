@@ -1,17 +1,11 @@
 part of 'sql.dart';
 
-/// Bare columns in an aggregate query
-/// distinct on
-/// SELECT a, b, max(c) FROM tab1 GROUP BY a;
-/// min/max 在聚合查询时,  会返回包含min/max值的行.
-/// 利用这特特性, 可以实现postgresql distinct on 的特性
-/// https://sqlite.org/lang_select.html#bareagg
-/// https://sqlite.org/lang_select.html
-extension LiteSqlInsertExt on LiteSQL {
+
+extension LiteSqlInsertExt on SQLExecutor {
   /// query([], from:Person)
   /// query(["*"], from:Person)
   /// query([Person.values], from:Person)
-  ResultSet query(
+  Future<QueryResult> query(
     List<Object> columns, {
     required Object from,
     Object? where,
@@ -34,7 +28,7 @@ extension LiteSqlInsertExt on LiteSQL {
       if (offset != null) e = e.OFFSET(offset);
     }
     e.addArgs(args);
-    return e.query(this);
+    return e.queryX(this);
   }
 
   int insert(Object table, {required Iterable<ColumnValue> values, InsertOption? conflict, Returning? returning}) {
@@ -211,7 +205,7 @@ extension LiteSqlInsertExt on LiteSQL {
     return idList;
   }
 
-  int delete(Object table, {required Where where, Returning? returning}) {
+  int delete(Object table, {required Where where, Returning? returning}) async  {
     assert(where.isNotEmpty);
     SpaceBuffer buf = SpaceBuffer("DELETE FROM");
     buf << _tableNameOf(table).escapeSQL;
@@ -219,7 +213,7 @@ extension LiteSqlInsertExt on LiteSQL {
     buf << where.sql;
     if (LiteSQL._supportReturning && returning != null) {
       buf << returning.clause;
-      ResultSet rs = rawQuery(buf.toString(), where.args);
+      QueryResult rs = await  rawQuery(buf.toString(), where.args);
       returning.returnRows.addAll(rs.listRows());
     } else {
       execute(buf.toString(), where.args);
@@ -235,7 +229,7 @@ extension LiteSqlInsertExt on LiteSQL {
     return update(table, values: values.entries, where: where, returning: returning);
   }
 
-  int updateValues(Object table, {required Iterable<Object> columns, required Iterable<dynamic> values, required Where where, Returning? returning}) {
+  int updateValues(Object table, {required Iterable<Object> columns, required Iterable<dynamic> values, required Where where, Returning? returning}) async {
     assert(columns.isNotEmpty && columns.length == values.length);
 
     SpaceBuffer buf = SpaceBuffer("UPDATE");
@@ -247,7 +241,7 @@ extension LiteSqlInsertExt on LiteSQL {
     var argList = <dynamic>[...values, ...(where.args)];
     if (LiteSQL._supportReturning && returning != null) {
       buf << returning.clause;
-      ResultSet rs = rawQuery(buf.toString(), argList);
+      QueryResult rs = await  rawQuery(buf.toString(), argList);
       returning.returnRows.addAll(rs.listRows());
     } else {
       execute(buf.toString(), argList);

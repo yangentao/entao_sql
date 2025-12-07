@@ -12,7 +12,7 @@ import 'package:sqlite3/sqlite3.dart';
 
 import 'sqlite/sqlite3_ffi.dart' as xsql;
 
-part 'LiteExt.dart';
+part 'executor_ext.dart';
 part 'ResultSetEx.dart';
 part 'SpaceBuffer.dart';
 part 'TableColumn.dart';
@@ -32,7 +32,7 @@ part 'executor.dart';
 part 'pragma.dart';
 part 'sql_utils.dart';
 part 'sqlite/LiteSQL.dart';
-
+part 'query_result_ext.dart';
 typedef FutureCallback = Future<void> Function();
 typedef FutureOrCallback = FutureOr<void> Function();
 

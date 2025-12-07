@@ -11,7 +11,7 @@ class SQliteExecutor implements SQLExecutorTx {
   SQliteExecutor(this.lite);
 
   @override
-  Stream<RowData> queryStream(String sql, {AnyList? parameters}) async* {
+  Stream<RowData> queryStream(String sql, [AnyList? parameters]) async* {
     PreparedStatement ps = lite.prepareSQL(sql);
     IteratingCursor ic = ps.selectCursor(parameters ?? const []);
     ResultMeta meta = ic.meta;
@@ -22,12 +22,12 @@ class SQliteExecutor implements SQLExecutorTx {
   }
 
   @override
-  QueryResult rawQuery(String sql, {AnyList? parameters, bool ignoreRows = false}) {
+  QueryResult rawQuery(String sql, [AnyList? parameters]) {
     return lite.rawQuery(sql, parameters).queryResult;
   }
 
   @override
-  void execute(String sql, {AnyList? parameters}) {
+  void execute(String sql, [AnyList? parameters]) {
     lite.execute(sql, parameters);
   }
 
