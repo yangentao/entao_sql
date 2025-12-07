@@ -59,7 +59,7 @@ class PgSessionExecutor implements SQLExecutor {
   }
 
   @override
-  Future<List<QueryResult>> executeMulti(String sql, List<AnyList> parametersList) async {
+  Future<List<QueryResult>> executeMulti(String sql, Iterable<AnyList> parametersList) async {
     List<QueryResult> ls = [];
     Statement st = await session.prepare(sql);
     for (final params in parametersList) {

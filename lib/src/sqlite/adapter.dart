@@ -1,4 +1,3 @@
-
 part of 'sqlite.dart';
 
 class SQliteExecutor implements SQLExecutorTx {
@@ -28,15 +27,17 @@ class SQliteExecutor implements SQLExecutorTx {
   }
 
   @override
-  void executeMulti(String sql, List<AnyList> parametersList) {
+  List<QueryResult> executeMulti(String sql, Iterable<AnyList> parametersList) {
+    List<QueryResult> ls = [];
     final st = lite.prepareSQL(sql);
     try {
       for (var params in parametersList) {
-        st.execute(params);
+        ls << st.select(params.toList()).queryResult;
       }
     } finally {
       st.close();
     }
+    return ls;
   }
 
   @override

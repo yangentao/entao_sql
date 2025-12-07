@@ -1,5 +1,14 @@
 part of 'sql.dart';
 
+extension StringOrEmptyExt on String? {
+  String? operator |(String? other) {
+    if (this == null) return other;
+    if (other == null) return this;
+    if (this!.isEmpty) return other;
+    return this;
+  }
+}
+
 extension StreamDoneExt<T> on Stream<T> {
   Stream<T> whenComplete(VoidCallback callback) {
     StreamController<T> controller = StreamController(onCancel: callback);

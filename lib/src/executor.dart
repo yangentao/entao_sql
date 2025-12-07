@@ -3,7 +3,7 @@ part of 'sql.dart';
 abstract interface class SQLExecutor {
   FutureOr<void> execute(String sql, [AnyList? parameters]);
 
-  FutureOr<void> executeMulti(String sql, List<AnyList> parametersList);
+  FutureOr<List<QueryResult>> executeMulti(String sql, Iterable<AnyList> parametersList);
 
   FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]);
 

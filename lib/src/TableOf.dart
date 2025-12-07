@@ -42,63 +42,58 @@ class TableOf<M extends TableModel<E>, E extends TableColumn> {
     return executor.query(columns ?? [], from: tableName, where: where, groupBy: groupBy, having: having, window: window, orderBy: orderBy, limit: limit, offset: offset);
   }
 
-  int delete({required Where where, Returning? returning}) {
-    return executor.delete(tableName, where: where, returning: returning);
+  Future<QueryResult> delete({required Where where, Returning? returning}) async {
+    return await executor.delete(tableName, where: where, returning: returning);
   }
 
   /// xx(key: 1, ...)
   /// xx(key: [1,name],...)
   /// support union primary key(s)
-  int deleteBy({required Object key, Returning? returning}) {
-    return delete(where: _keyWhere(key), returning: returning);
+  Future<QueryResult> deleteBy({required Object key, Returning? returning}) async {
+    return await delete(where: _keyWhere(key), returning: returning);
   }
 
-  int update({required List<ColumnValue> values, required Where where, Returning? returning}) {
-    return executor.update(tableName, values: values, where: where, returning: returning);
+  Future<QueryResult> update({required List<ColumnValue> values, required Where where, Returning? returning}) async {
+    return await executor.update(tableName, values: values, where: where, returning: returning);
   }
 
   /// xx(key: 1, ...)
   /// xx(key: [1,name],...)
   /// support union primary key(s)
-  int updateBy({required Object key, required List<ColumnValue> values, Returning? returning}) {
-    return executor.update(tableName, values: values, where: _keyWhere(key), returning: returning);
+  Future<QueryResult> updateBy({required Object key, required List<ColumnValue> values, Returning? returning}) async {
+    return await executor.update(tableName, values: values, where: _keyWhere(key), returning: returning);
   }
 
-  int upsert({required List<ColumnValue> values, Returning? returning}) {
-    return executor.upsert(tableName, values: values, constraints: primaryKeys, returning: returning);
+  Future<RowData?> upsert({required List<ColumnValue> values, Returning? returning}) async {
+    return await executor.upsert(tableName, values: values, constraints: primaryKeys, returning: returning);
   }
 
-  int insert({required List<ColumnValue> values, InsertOption? conflict, Returning? returning}) {
-    if (values.isEmpty) return 0;
-    return executor.insert(tableName, values: values, conflict: conflict, returning: returning);
+  Future<RowData?> insert({required List<ColumnValue> values, InsertOption? conflict, Returning? returning}) async {
+    if (values.isEmpty) return null;
+    return await executor.insert(tableName, values: values, conflict: conflict, returning: returning);
   }
 
-  List<int> insertAll({required List<List<ColumnValue>> rows, InsertOption? conflict, Returning? returning}) {
-    if (rows.isEmpty) return [];
-    return executor.insertAll(tableName, rows: rows, conflict: conflict, returning: returning);
+  Future<List<RowData>> insertAll({required List<List<ColumnValue>> rows, InsertOption? conflict, Returning? returning}) async {
+    if (rows.isEmpty) return const [];
+    return await executor.insertAll(tableName, rows: rows, conflict: conflict, returning: returning);
   }
 
-  int save(M? item, {bool returning = true}) {
-    if (item == null) return 0;
-    if (returning) {
-      Returning r = Returning.ALL;
-      int n = upsert(values: proto.columns.mapList((e) => e >> e.get(item)), returning: r);
-      if (r.hasReturn) {
-        item.model.addAll(r.firstRow);
-      }
-      return n;
-    } else {
-      return upsert(values: proto.columns.mapList((e) => e >> e.get(item)));
+  Future<RowData?> save(M? item) async {
+    if (item == null) return null;
+    RowData? row = await upsert(values: proto.columns.mapList((e) => e >> e.get(item)), returning: Returning.ALL);
+    if (row != null) {
+      item.model.addAll(row.toMap());
     }
+    return row;
   }
 
-  List<int> saveAll(List<M> items, {bool returning = true}) {
-    if (items.isEmpty) return [];
-    List<int> idList = [];
+  Future<List<RowData?>> saveAll(List<M> items) async {
+    if (items.isEmpty) return const [];
+    List<RowData?> ls = [];
     for (M item in items) {
-      idList << save(item, returning: returning);
+      ls << await save(item);
     }
-    return idList;
+    return ls;
   }
 
   Where _keyWhere(Object value) => _keyEQ(value: value, keys: primaryKeys);

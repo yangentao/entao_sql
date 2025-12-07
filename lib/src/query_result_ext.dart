@@ -4,6 +4,10 @@ part of 'sql.dart';
 extension QueryResultExt on QueryResult {
   int get columnCount => meta.columns.length;
 
+  RowData rowDataAt(int index) => RowData(this[index], meta: meta);
+
+  RowData? get firstRowData => this.isEmpty ? null : rowDataAt(0);
+
   AnyMap rowAt({required int index}) => AnyMap.fromEntries(this[index].mapIndex((i, e) => MapEntry(meta.columns[i].label, e)));
 
   AnyMap? firstRow() => this.isEmpty ? null : rowAt(index: 0);

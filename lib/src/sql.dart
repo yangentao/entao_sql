@@ -51,7 +51,7 @@ final class Returning {
 
   AnyMap get firstRow => returnRows.first;
 
-  String get clause => " RETURNING ${columns.join(", ")}";
+  String get clause => " RETURNING ${columns.join(", ") | '*'}";
 
   static Returning get ALL => Returning(const ["*"]);
 }

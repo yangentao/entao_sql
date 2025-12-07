@@ -32,58 +32,59 @@ class TableModel<E> {
     return wherePks.and();
   }
 
-  int delete() {
-    return _executor.delete(_tableName, where: _keyWhere);
+  Future<QueryResult> delete() async {
+    return await _executor.delete(_tableName, where: _keyWhere);
   }
 
   /// update modified fields within callback by key(s),
-  int update(VoidCallback callback) {
+  Future<RowData?> update(VoidCallback callback) async {
     _modifiedKeys.clear();
     callback();
-    if (_modifiedKeys.isEmpty) return 0;
+    if (_modifiedKeys.isEmpty) return null;
     _modifiedKeys.clear();
     var ls = _modifiedKeys.toList();
-    return updateByKey(columns: ls);
+    return await updateByKey(columns: ls);
   }
 
-  int updateByKey({List<Object>? columns, List<Object>? excludes}) {
+  Future<RowData?> updateByKey({List<Object>? columns, List<Object>? excludes}) async {
     List<MapEntry<TableColumn, dynamic>> values = _fieldValues(columns: columns, excludes: excludes);
     values.removeWhere((e) => e.key.proto.primaryKey);
     values.retainWhere((e) => e.value != null || true == columns?.contains(e.key.columnName));
-    if (values.isEmpty) return 0;
+    if (values.isEmpty) return null;
     Returning ret = Returning.ALL;
-    int n = _executor.update(_tableName, values: values, where: _keyWhere, returning: ret);
-    if (n > 0) {
-      this.model.addAll(ret.firstRow);
+    QueryResult qr = await _executor.update(_tableName, values: values, where: _keyWhere, returning: ret);
+    RowData? row = qr.firstRowData;
+    if (row != null) {
+      this.model.addAll(row.toMap());
     }
-    return n;
+    return row;
   }
 
   // only nonull field will be insert, or 'columns' contains it
-  int insert({List<Object>? columns, List<Object>? excludes, InsertOption? conflict}) {
+  Future<RowData?> insert({List<Object>? columns, List<Object>? excludes, InsertOption? conflict}) async {
     List<MapEntry<TableColumn, dynamic>> ls = _fieldValues(columns: columns, excludes: excludes);
     ls.retainWhere((e) => e.value != null || true == columns?.contains(e.key.columnName));
-    if (ls.isEmpty) return 0;
+    if (ls.isEmpty) return null;
     Returning ret = Returning.ALL;
-    int id = _executor.insert(_tableName, values: ls, conflict: conflict, returning: ret);
-    if (ret.hasReturn) {
-      this.model.addAll(ret.firstRow);
+    RowData? row = await _executor.insert(_tableName, values: ls, conflict: conflict, returning: ret);
+    if (row != null) {
+      this.model.addAll(row.toMap());
     }
-    return id;
+    return row;
   }
 
   // only nonull field will be insert, or 'columns' contains it
-  int upsert({List<Object>? columns, List<Object>? excludes, InsertOption? conflict}) {
+  Future<RowData?> upsert({List<Object>? columns, List<Object>? excludes, InsertOption? conflict}) async {
     List<MapEntry<TableColumn, dynamic>> ls = _fieldValues(columns: columns, excludes: excludes);
     ls.retainWhere((e) => e.value != null || true == columns?.contains(e.key.columnName));
-    if (ls.isEmpty) return 0;
+    if (ls.isEmpty) return null;
     Returning ret = Returning.ALL;
-    int id = _executor.upsert(_tableName, values: ls, constraints: _proto.primaryKeys, returning: ret);
-    if (ret.hasReturn) {
-      this.model.addAll(ret.firstRow);
+    RowData? row = await _executor.upsert(_tableName, values: ls, constraints: _proto.primaryKeys, returning: ret);
+    if (row != null) {
+      this.model.addAll(row.toMap());
     }
     _modifiedKeys.clear();
-    return id;
+    return row;
   }
 
   List<MapEntry<TableColumn, dynamic>> _fieldValues({List<Object>? columns, List<Object>? excludes}) {
