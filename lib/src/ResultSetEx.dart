@@ -1,24 +1,10 @@
 part of 'sql.dart';
 
 extension ResultSetExt on ResultSet {
-  int get columnCount => columnNames.length;
-
-  Object? valueAt({required int row, required int col}) => this.rows[row][col];
-
-  Object? valueNamed({required int row, required String col}) => this[row][col];
-
   dynamic firstValue() => this.firstOrNull?.columnAt(0);
 
-  List<T> listValues<T>({int col = 0}) => this.mapList((e) => e.columnAt(col));
-
-
-  AnyMap? firstRow() => this.firstOrNull?.mapSQL;
 
   List<AnyMap> listRows() => this.mapList((e) => e.mapSQL);
-
-  T modelAt<T>(ModelCreator<T> creator, {required int row}) => this.elementAt(row).let((e) => creator(e));
-
-  T? firstModel<T>(ModelCreator<T> creator) => firstRow()?.let((e) => creator(e));
 
   List<T> listModels<T>(ModelCreator<T> creator) => listRows().mapList((e) => creator(e));
 
