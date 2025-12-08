@@ -4,8 +4,8 @@ part of 'sqlite.dart';
 
 // Enum,  Methods can't be invoked in constant expressions.
 
-class INTEGER extends ColumnProto {
-  const INTEGER({
+class INT64 extends ColumnProto {
+  const INT64({
     super.rename,
     super.type = "INTEGER",
     super.primaryKey = false,
@@ -20,8 +20,8 @@ class INTEGER extends ColumnProto {
   });
 }
 
-class REAL extends ColumnProto {
-  const REAL({
+class REAL64 extends ColumnProto {
+  const REAL64({
     super.rename,
     super.type = "REAL",
     super.primaryKey = false,
