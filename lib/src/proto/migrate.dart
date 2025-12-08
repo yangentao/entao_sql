@@ -2,8 +2,16 @@ part of '../sql.dart';
 
 extension ExecutorTableExt on SQLExecutor {
   /// liteSQL.register(Person.values)
-  void register<T extends TableColumn<T>>(List<T> fields, {bool migrate = true}) {
-    _registerTable(this, fields, migrate: migrate);
+  Future<void> register<T extends TableColumn<T>>(List<T> fields, {bool migrate = true}) async {
+    assert(fields.isNotEmpty);
+    if (TableProto.isMigrated<T>()) return;
+    final _ = TableProto<T>._(fields.first.tableName, fields, executor: this);
+    if (migrate) {
+      SQLMigrator? m = this.migrator;
+      if (m != null) {
+        await m.migrate(this, fields);
+      }
+    }
   }
 }
 

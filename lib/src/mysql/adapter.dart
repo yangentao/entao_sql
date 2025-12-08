@@ -12,12 +12,10 @@ Future<MySqlConnection> mysqlCreateConnection() async {
   return await MySqlConnection.connect(setting);
 }
 
-class MySqlConnectionExecutor implements SQLExecutorTx {
+class MySqlConnectionExecutor extends SQLExecutorTx {
   final MySqlConnection connection;
-  @override
-  final String defaultSchema;
 
-  MySqlConnectionExecutor(this.connection, {required this.defaultSchema});
+  MySqlConnectionExecutor(this.connection, {required String database, super.migrator}) : super(defaultSchema: database);
 
   @override
   FutureOr<int> lastInsertId() async {

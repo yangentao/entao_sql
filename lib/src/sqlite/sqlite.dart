@@ -11,6 +11,7 @@ part 'adapter.dart';
 part 'litesql.dart';
 part 'pragma.dart';
 part 'resultset.dart';
+part 'migrator.dart';
 
 enum InsertOption {
   abort("ABORT"),

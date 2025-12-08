@@ -1,11 +1,9 @@
 part of 'sqlite.dart';
 
-class SQliteExecutor implements SQLExecutorTx {
+class SQliteExecutor extends SQLExecutorTx {
   LiteSQL lite;
-  @override
-  final String defaultSchema;
 
-  SQliteExecutor(this.lite) : this.defaultSchema = "main";
+  SQliteExecutor(this.lite, {super.migrator}) : super(defaultSchema: "main");
 
   @override
   FutureOr<int> lastInsertId() => lite.lastInsertRowId;

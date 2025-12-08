@@ -1,7 +1,10 @@
 part of 'sql.dart';
 
-abstract interface class SQLExecutor {
-  String get defaultSchema;
+abstract class SQLExecutor {
+  final String defaultSchema;
+  final SQLMigrator? migrator;
+
+  SQLExecutor({required this.defaultSchema, this.migrator});
 
   FutureOr<int> lastInsertId() => 0;
 
@@ -20,6 +23,8 @@ abstract interface class SQLExecutor {
   FutureOr<Set<String>> indexFields(String tableName, String indexName, [String? schema]);
 }
 
-abstract interface class SQLExecutorTx implements SQLExecutor {
+abstract class SQLExecutorTx extends SQLExecutor {
+  SQLExecutorTx({required super.defaultSchema, super.migrator});
+
   FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback);
 }
