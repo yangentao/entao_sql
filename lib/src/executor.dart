@@ -18,7 +18,7 @@ abstract interface class SQLExecutor {
 }
 
 abstract interface class SQLExecutorTx implements SQLExecutor {
-  FutureOr<void> transaction(FutureOr<void> Function(SQLExecutor) callback);
+  FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback);
 }
 
 extension ExpressExecutorExt<T extends Express> on T {

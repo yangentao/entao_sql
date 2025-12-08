@@ -15,7 +15,7 @@ class LiteSQL {
   LiteSQL({required this.database}) : _nativeDatabase = ffi.Pointer<ffi.Opaque>.fromAddress(database.handle.address);
 
   static Version version = sqlite3.version;
-  static final bool _supportReturning = version.versionNumber >= 3035000;
+  // static final bool _supportReturning = version.versionNumber >= 3035000;
 
   static LiteSQL open(String path, {String? vfs, OpenMode mode = OpenMode.readWriteCreate, bool uri = false, bool? mutex}) {
     var db = sqlite3.open(path, vfs: vfs, mode: mode, uri: uri, mutex: mutex);

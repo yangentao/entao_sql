@@ -36,11 +36,12 @@ class SQliteExecutor implements SQLExecutorTx {
   }
 
   @override
-  Future<void> transaction(FutureOr<void> Function(SQLExecutor) callback) async {
+  FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) async {
     lite.execute("BEGIN");
     try {
-      await callback(this);
+      final r =  await callback(this);
       lite.execute("COMMIT");
+      return r ;
     } catch (e) {
       lite.execute("ROLLBACK");
       rethrow;

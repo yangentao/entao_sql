@@ -14,9 +14,9 @@ class PgPoolExecutor<T> extends PgSessionExecutor implements SQLExecutorTx {
   PgPoolExecutor(this.pool, {PostgresOptions? options}) : super(pool, options: options);
 
   @override
-  FutureOr<void> transaction(FutureOr<void> Function(SQLExecutor) callback) {
-    pool.runTx((session) async {
-      await callback(PgSessionExecutor(session, options: options));
+  FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) {
+    return pool.runTx((session) async {
+      return await callback(PgSessionExecutor(session, options: options));
     }, settings: options?.transactionSettings);
   }
 }
@@ -27,9 +27,9 @@ class PgConnectionExecutor extends PgSessionExecutor implements SQLExecutorTx {
   PgConnectionExecutor(this.connection, {PostgresOptions? options}) : super(connection, options: options);
 
   @override
-  FutureOr<void> transaction(FutureOr<void> Function(SQLExecutor) callback) {
-    connection.runTx((session) async {
-      await callback(PgSessionExecutor(session, options: options));
+  FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) {
+    return connection.runTx((session) async {
+      return await callback(PgSessionExecutor(session, options: options));
     }, settings: options?.transactionSettings);
   }
 }
