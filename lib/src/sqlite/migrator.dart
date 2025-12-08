@@ -2,116 +2,138 @@ part of 'sqlite.dart';
 
 class SQLiteMigrator extends SQLMigrator {
   @override
-  Future<void> migrate<T extends TableColumn<T>>(SQLExecutor executor, TableProto<T> tableProto) async {}
-}
-
-Future<void> _migrateTable(SQLExecutor executor, String tableName, List<TableColumn> fields) async {
-  if (!await executor.tableExists(tableName)) {
-    _createTable(executor, tableName, fields);
-    return;
-  }
-
-  Set<String> colSet = await executor.tableFields(tableName);
-  for (TableColumn f in fields) {
-    if (!colSet.contains(f.columnName)) {
-      await _addColumn(executor, tableName, f);
-    }
-  }
-  Set<String> idxSet = {};
-  Set<String> idxs = await executor.listIndex(tableName);
-  for (String idx in idxs) {
-    final fs = await executor.indexFields(tableName, idx);
-    idxSet.addAll(fs);
-  }
-  for (TableColumn f in fields) {
-    if (f.proto.primaryKey || f.proto.unique || notBlank(f.proto.uniqueName)) continue;
-    if (f.proto.index && !idxSet.contains(f.columnName)) {
-      await _createIndex(executor, tableName, [f.columnName]);
-    }
+  Future<void> migrate<T extends TableColumn<T>>(SQLExecutor executor, TableProto<T> tableProto) async {
+    _MigratorLite((executor as SQliteExecutor).lite, tableProto).migrate();
   }
 }
 
-Future<void> _createIndex(SQLExecutor executor, String table, List<String> fields) async {
-  String idxName = makeIndexName(table, fields);
-  String sql = "CREATE INDEX IF NOT EXISTS $idxName ON ${table.escapeSQL} (${fields.map((e) => e.escapeSQL).join(",")})";
-  await executor.rawQuery(sql);
-}
+class _MigratorLite {
+  final LiteSQL lite;
+  final TableProto tableProto;
+  final List<TableColumn> fields;
+  final String tableName;
+  final String? schema;
 
-Future<void> _addColumn(SQLExecutor executor, String table, TableColumn field) async {
-  String sql = "ALTER TABLE ${table.escapeSQL} ADD COLUMN ${field.defineField(false)}";
-  await executor.rawQuery(sql);
-}
+  _MigratorLite(this.lite, this.tableProto, {this.schema})
+      : tableName = tableProto.name,
+        fields = tableProto.columns;
 
-Future<void> _createTable(SQLExecutor executor, String table, List<TableColumn> fields, {List<String>? constraints, List<String>? options}) async {
-  List<String> ls = [];
-  ls << "CREATE TABLE IF NOT EXISTS ${table.escapeSQL} (";
-
-  List<String> colList = [];
-
-  List<TableColumn> keyFields = fields.filter((e) => e.proto.primaryKey);
-  colList.addAll(fields.map((e) => e.defineField(keyFields.length > 1)));
-
-  if (keyFields.length > 1) {
-    colList << "PRIMARY KEY ( ${keyFields.map((e) => e.nameSQL).join(", ")})";
-  }
-  List<TableColumn> uniqeList = fields.filter((e) => e.proto.uniqueName != null && e.proto.uniqueName!.isNotEmpty);
-  if (uniqeList.isNotEmpty) {
-    Map<String, List<TableColumn>> map = uniqeList.groupBy((e) => e.proto.uniqueName!);
-    for (var e in map.entries) {
-      colList << "UNIQUE (${e.value.map((f) => f.nameSQL).join(", ")})";
+  void migrate() {
+    if (!lite.existTable(tableName)) {
+      createTable();
+      return;
     }
-  }
 
-  if (constraints != null && constraints.isNotEmpty) {
-    colList.addAll(constraints);
-  }
-  ls << colList.join(",\n");
-  if (options != null && options.isNotEmpty) {
-    ls << ") ${options.join(",")}";
-  } else {
-    ls << ")";
-  }
-
-  String sql = ls.join("\n");
-  await executor.rawQuery(sql);
-
-  for (var f in fields) {
-    if (f.proto.primaryKey || f.proto.unique || notBlank(f.proto.uniqueName)) {
-      continue;
-    }
-    if (f.proto.index) {
-      await _createIndex(executor, table, [f.columnName]);
-    }
-  }
-}
-
-extension _TableColumnDefExt<T extends Enum> on TableColumn<T> {
-  String defineField(bool multiKey) {
-    List<String> ls = [nameSQL];
-    ls << proto.type;
-    if (proto.primaryKey && !multiKey) {
-      ls << "PRIMARY KEY";
-      if (proto.autoInc) {
-        ls << "AUTOINCREMENT";
+    Set<String> colSet = tableFields();
+    for (TableColumn f in fields) {
+      if (!colSet.contains(f.columnName)) {
+        _addColumn(f);
       }
     }
-    if (!proto.primaryKey && !multiKey) {
-      if (proto.unique) {
-        ls << "UNIQUE";
-      }
-      if (proto.notNull) {
-        ls << "NOT NULL";
+    Set<String> idxSet = {};
+    Set<String> idxs = listIndex();
+    for (String idx in idxs) {
+      final fs = indexFields(idx);
+      idxSet.addAll(fs);
+    }
+    for (TableColumn f in fields) {
+      if (f.proto.primaryKey || f.proto.unique || notBlank(f.proto.uniqueName)) continue;
+      if (f.proto.index && !idxSet.contains(f.columnName)) {
+        _createIndex([f.columnName]);
       }
     }
-    if (proto.defaultValue != null && proto.defaultValue!.isNotEmpty) {
-      ls << "DEFAULT ${proto.defaultValue}";
+  }
+
+  void createTable({List<String>? constraints, List<String>? options}) {
+    SpaceBuffer buf = SpaceBuffer();
+    buf << "CREATE TABLE IF NOT EXISTS $tableName (";
+    buf << fields.joinMap(", ", (e) => defineField(e));
+
+    final pks = fields.filter((e) => e.proto.primaryKey);
+    if (pks.isNotEmpty) {
+      buf << ", " << "PRIMARY KEY (${pks.map((e) => e.nameSQL).join(", ")})";
     }
-    if (proto.check != null && proto.check!.isNotEmpty) {
-      ls << "CHECK (${proto.check})";
+    final uniqeList = fields.filter((e) => e.proto.unique || e.proto.uniqueName != null);
+    if (uniqeList.isNotEmpty) {
+      Map<String, List<TableColumn>> map = uniqeList.groupBy((e) => e.proto.uniqueName | "");
+      for (var e in map.entries) {
+        if (e.key == "") {
+          for (var c in e.value) {
+            buf << ", " << "UNIQUE (${c.nameSQL})";
+          }
+        } else {
+          buf << ", " << "CONSTRAINT " << e.key.escapeSQL << " UNIQUE (${e.value.map((f) => f.nameSQL).join(", ")})";
+        }
+      }
+    }
+
+    if (constraints != null && constraints.isNotEmpty) {
+      for (var s in constraints) {
+        buf << ", " << s;
+      }
+    }
+    buf << ")";
+    if (options != null && options.isNotEmpty) {
+      buf << options.join(", ");
+    }
+    lite.rawQuery(buf.toString());
+
+    for (var f in fields) {
+      if (f.proto.primaryKey || f.proto.unique || notBlank(f.proto.uniqueName)) {
+        continue;
+      }
+      if (f.proto.index) {
+        _createIndex([f.columnName]);
+      }
+    }
+  }
+
+  void _createIndex(List<String> fields) {
+    String idxName = makeIndexName(tableName, fields);
+    String sql = "CREATE INDEX IF NOT EXISTS $idxName ON $tableName (${fields.map((e) => e.escapeSQL).join(",")})";
+    lite.rawQuery(sql);
+  }
+
+  void _addColumn(TableColumn field) {
+    String sql = "ALTER TABLE ${tableName.escapeSQL} ADD COLUMN ${defineField(field)}";
+    lite.rawQuery(sql);
+  }
+
+  bool tableExists([String? schema]) {
+    return lite.existTable(tableName);
+  }
+
+  Set<String> tableFields([String? schema]) {
+    return lite.PRAGMA.table_info(tableName, schema: schema).map((e) => e.name).toSet();
+  }
+
+  Set<String> listIndex([String? schema]) {
+    return lite.PRAGMA.index_list(tableName, schema: schema).map((e) => e.name).toSet();
+  }
+
+  Set<String> indexFields(String indexName, [String? schema]) {
+    return lite.PRAGMA.index_info(indexName, schema: schema).map((e) => e.name).toSet();
+  }
+
+  String defineField(TableColumn col) {
+    ColumnProto proto = col.proto;
+    SpaceBuffer buf = SpaceBuffer(col.nameSQL);
+    buf << proto.type;
+    if (proto.autoInc) {
+      buf << "AUTOINCREMENT";
+    }
+    if (proto.notNull) {
+      buf << "NOT NULL";
+    }
+    if (proto.defaultValue.notEmpty) {
+      buf << "DEFAULT ${proto.defaultValue}";
+    }
+    if (proto.check.notEmpty) {
+      buf << "CHECK (${proto.check})";
     }
     if (proto.extras.notBlank) {
-      ls << proto.extras!;
+      buf << proto.extras!;
     }
-    return ls.join(" ");
+    return buf.toString();
   }
 }
