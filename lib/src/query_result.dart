@@ -9,10 +9,6 @@ class QueryResult extends UnmodifiableListView<List<Object?>> {
   int labelIndex(String label) => meta.labelIndex(label);
 
   QueryResult(List<List<Object?>> super.source, {required this.meta, this.rawResult, this.affectedRows = 0, this.lastInsertId = 0});
-
-  List<AnyMap> toMaps() => this.mapIndex((_, row) => AnyMap.fromEntries(row.mapIndex((i, e) => MapEntry(meta.columns[i].label, e))));
-
-  List<RowData> toRows() => this.mapList((e) => RowData(e, meta: meta));
 }
 
 class ResultMeta {
@@ -26,6 +22,7 @@ class ResultMeta {
   int labelIndex(String label) => labelIndexMap[label] ?? errorSQL("NO label found");
 }
 
+// TODO add Type type property.
 class ColumnMeta {
   final String label;
   final int typeId;
@@ -40,6 +37,8 @@ class RowData extends UnmodifiableListView<Object?> {
   RowData(super.source, {required this.meta});
 
   int labelIndex(String label) => meta.labelIndex(label);
+
+  Object? named(String label) => this[labelIndex(label)];
 
   AnyMap toMap() => AnyMap.fromEntries(this.mapIndex((i, e) => MapEntry(meta.columns[i].label, e)));
 }

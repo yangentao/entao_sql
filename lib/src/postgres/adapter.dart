@@ -44,6 +44,12 @@ class PgSessionExecutor implements SQLExecutor {
   DBType get dbType => DBType.postgres;
 
   @override
+  FutureOr<int> lastInsertId() async {
+    final r = await rawQuery("SELECT lastval()");
+    return r.firstInt() ?? 0;
+  }
+
+  @override
   Future<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]) async {
     Statement st = await session.prepare(sql);
     Stream<RowData> s = st.bind(parameters).map((r) => RowData(r, meta: r.schema.meta));

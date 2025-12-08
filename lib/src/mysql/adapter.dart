@@ -21,6 +21,12 @@ class MySqlConnectionExecutor implements SQLExecutorTx {
   DBType get dbType => DBType.mysql;
 
   @override
+  FutureOr<int> lastInsertId() async {
+    final r = await rawQuery("SELECT LAST_INSERT_ID()");
+    return r.firstInt() ?? 0;
+  }
+
+  @override
   FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) async {
     List<Results> ls = await connection.queryMulti(sql, parametersList);
     return ls.mapList((rs) => rs.queryResult(affectedRows: rs.affectedRows ?? 0, lastInsertId: 0));

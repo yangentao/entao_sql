@@ -53,7 +53,7 @@ class TableModel<E> {
     if (values.isEmpty) return null;
     Returning ret = Returning.ALL;
     QueryResult qr = await _executor.update(_tableName, values: values, where: _keyWhere, returning: ret);
-    RowData? row = qr.firstRowData;
+    RowData? row = qr.firstRow();
     if (row != null) {
       this.model.addAll(row.toMap());
     }

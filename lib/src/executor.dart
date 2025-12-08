@@ -2,6 +2,9 @@ part of 'sql.dart';
 
 abstract interface class SQLExecutor {
   DBType get dbType;
+
+  FutureOr<int> lastInsertId() => 0;
+
   FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]);
 
   FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList);

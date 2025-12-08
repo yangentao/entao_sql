@@ -4,35 +4,52 @@ part of 'sql.dart';
 extension QueryResultExt on QueryResult {
   int get columnCount => meta.columns.length;
 
-  RowData rowDataAt(int index) => RowData(this[index], meta: meta);
+  // value
+  int? firstInt({int col = 0}) => this.firstValueAt(col: col) as int?;
 
-  RowData? get firstRowData => this.isEmpty ? null : rowDataAt(0);
+  String? firstString({int col = 0}) => this.firstValueAt(col: col) as String?;
 
-  AnyMap rowAt({required int index}) => AnyMap.fromEntries(this[index].mapIndex((i, e) => MapEntry(meta.columns[i].label, e)));
+  dynamic firstValueAt({int col = 0}) => this.firstOrNull?[col];
 
-  AnyMap? firstRow() => this.isEmpty ? null : rowAt(index: 0);
+  dynamic firstValueNamed({required String name}) => this.firstOrNull?[labelIndex(name)];
 
-  List<AnyMap> listRows() => toMaps();
+  List<T> allValuesAt<T>({int col = 0}) => this.mapList((e) => e[col] as T);
 
-  Object? valueAt({required int row, required int col}) => this[row][col];
+  List<T> allValuesNamed<T>({required String name}) {
+    int col = labelIndex(name);
+    return this.mapList((e) => e[col] as T);
+  }
 
-  Object? valueNamed({required int row, required String col}) => this[row][labelIndex(col)];
+  dynamic valueAt({required int row, required int col}) => this[row][col];
 
-  dynamic firstValue() => this.firstOrNull?.firstOrNull;
+  dynamic valueNamed({required int row, required String col}) => this[row][labelIndex(col)];
 
-  List<T> listValues<T>({int col = 0}) => this.mapList((e) => e[col] as T);
+  // map
+  AnyMap? firstMap() => this.isEmpty ? null : mapAt(0);
 
-  T modelAt<T>(ModelCreator<T> creator, {required int row}) => creator(this.rowAt(index: row));
+  AnyMap mapAt(int row) => AnyMap.fromEntries(this[row].mapIndex((i, e) => MapEntry(meta.columns[i].label, e)));
 
-  T? firstModel<T>(ModelCreator<T> creator) => firstRow()?.let((e) => creator(e));
+  List<AnyMap> allMaps() => this.mapIndex((i, _) => mapAt(i));
 
-  List<T> listModels<T>(ModelCreator<T> creator) => listRows().mapList((e) => creator(e));
+  // model
+  T? firstModel<T>(ModelCreator<T> creator) => firstMap()?.let(creator);
+
+  T modelAt<T>(ModelCreator<T> creator, {required int row}) => creator(this.mapAt(row));
+
+  List<T> allModels<T>(ModelCreator<T> creator) => allMaps().mapList(creator);
+
+  // row
+  RowData? firstRow() => this.isEmpty ? null : rowAt(0);
+
+  RowData rowAt(int row) => RowData(this[row], meta: meta);
+
+  List<RowData> allRows() => this.mapList((e) => RowData(e, meta: meta));
 
   void dump() {
     if (this.isEmpty) {
       logSQL.d("[empty]");
     } else {
-      for (AnyMap row in this.toMaps()) {
+      for (AnyMap row in this.allMaps()) {
         logSQL.d(row);
       }
     }

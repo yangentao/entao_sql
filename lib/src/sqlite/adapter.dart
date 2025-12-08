@@ -6,6 +6,9 @@ class SQliteExecutor implements SQLExecutorTx {
   SQliteExecutor(this.lite);
 
   @override
+  FutureOr<int> lastInsertId() => lite.lastInsertRowId;
+
+  @override
   Stream<RowData> streamQuery(String sql, [AnyList? parameters]) async* {
     lite.lastInsertRowId = 0;
     PreparedStatement ps = lite.prepareSQL(sql);

@@ -45,7 +45,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     SpaceBuffer buf = _insertBuffer(table, columns);
     buf << returning.clause;
     QueryResult rs = await this.rawQuery(buf.toString(), values.toList());
-    return rs.firstRowData;
+    return rs.firstRow();
   }
 
   Future<List<RowData>> insertAll(Object table, {required Iterable<List<ColumnValue>> rows, Returning? returning}) async {
@@ -73,7 +73,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     SpaceBuffer buf = _insertBuffer(table, columns);
     buf << returning.clause;
     List<QueryResult> ls = await this.multiQuery(buf.toString(), rows);
-    return ls.mapList((e) => e.firstRowData!);
+    return ls.mapList((e) => e.firstRow()!);
   }
 
   Future<RowData?> upsert(Object table, {required Iterable<ColumnValue> values, required Iterable<Object> constraints, Returning? returning}) async {
@@ -114,7 +114,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     var argList = [...values, ...otherNames.mapList((e) => valueList[columnNames.indexOf(e)])];
     buf << returning.clause;
     QueryResult rs = await rawQuery(buf.toString(), argList);
-    return rs.firstRowData;
+    return rs.firstRow();
   }
 
   Future<List<RowData>> upsertAll(Object table, {required List<List<ColumnValue>> rows, required Iterable<Object> constraints, Returning? returning}) async {
@@ -158,7 +158,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     buf << returning.clause;
     final argss = rows.map((row) => [...row, ...otherNames.mapList((e) => row[columnNames.indexOf(e)])]);
     List<QueryResult> ls = await multiQuery(buf.toString(), argss);
-    return ls.mapList((e) => e.firstRowData!);
+    return ls.mapList((e) => e.firstRow()!);
   }
 
   Future<QueryResult> delete(Object table, {required Where where, Returning? returning}) async {
