@@ -49,7 +49,7 @@ Future<void> _createIndex(SQLExecutor executor, String table, List<String> field
 }
 
 Future<void> _addColumn(SQLExecutor executor, String table, TableColumn field) async {
-  String sql = "ALTER TABLE ${table.escapeSQL} ADD COLUMN ${field.defineField(false, executor.dbType)}";
+  String sql = "ALTER TABLE ${table.escapeSQL} ADD COLUMN ${field.defineField(false)}";
   await executor.rawQuery(sql);
 }
 
@@ -60,7 +60,7 @@ Future<void> _createTable(SQLExecutor executor, String table, List<TableColumn> 
   List<String> colList = [];
 
   List<TableColumn> keyFields = fields.filter((e) => e.proto.primaryKey);
-  colList.addAll(fields.map((e) => e.defineField(keyFields.length > 1, executor.dbType)));
+  colList.addAll(fields.map((e) => e.defineField(keyFields.length > 1)));
 
   if (keyFields.length > 1) {
     colList << "PRIMARY KEY ( ${keyFields.map((e) => e.nameSQL).join(", ")})";

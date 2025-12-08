@@ -51,7 +51,7 @@ mixin TableColumn<T extends Enum> on Enum {
     return MapEntry<TableColumn<T>, dynamic>(this, value);
   }
 
-  String defineField(bool multiKey, DBType dbType) {
+  String defineField(bool multiKey ) {
     List<String> ls = [nameSQL];
     ls << proto.type;
     if (proto.primaryKey && !multiKey) {

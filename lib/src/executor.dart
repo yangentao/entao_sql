@@ -1,7 +1,7 @@
 part of 'sql.dart';
 
 abstract interface class SQLExecutor {
-  DBType get dbType;
+  String get defaultSchema;
 
   FutureOr<int> lastInsertId() => 0;
 

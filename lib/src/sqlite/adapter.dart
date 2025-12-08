@@ -2,8 +2,10 @@ part of 'sqlite.dart';
 
 class SQliteExecutor implements SQLExecutorTx {
   LiteSQL lite;
+  @override
+  final String defaultSchema;
 
-  SQliteExecutor(this.lite);
+  SQliteExecutor(this.lite) : this.defaultSchema = "main";
 
   @override
   FutureOr<int> lastInsertId() => lite.lastInsertRowId;
@@ -77,9 +79,6 @@ class SQliteExecutor implements SQLExecutorTx {
   Set<String> indexFields(String tableName, String indexName, [String? schema]) {
     return lite.PRAGMA.index_info(indexName, schema: schema).map((e) => e.name).toSet();
   }
-
-  @override
-  DBType get dbType => DBType.sqlite;
 }
 
 extension ResultMetaSQLite on Cursor {

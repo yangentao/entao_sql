@@ -14,11 +14,10 @@ Future<MySqlConnection> mysqlCreateConnection() async {
 
 class MySqlConnectionExecutor implements SQLExecutorTx {
   final MySqlConnection connection;
-
-  MySqlConnectionExecutor(this.connection);
-
   @override
-  DBType get dbType => DBType.mysql;
+  final String defaultSchema;
+
+  MySqlConnectionExecutor(this.connection, {required this.defaultSchema});
 
   @override
   FutureOr<int> lastInsertId() async {
@@ -55,18 +54,17 @@ class MySqlConnectionExecutor implements SQLExecutorTx {
     return r as R;
   }
 
-  // TODO schema 必须!
   @override
   FutureOr<bool> tableExists(String tableName, [String? schema]) async {
     String sql = "SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
-    QueryResult r = await rawQuery(sql, [schema, tableName]);
+    QueryResult r = await rawQuery(sql, [schema | defaultSchema, tableName]);
     return r.isNotEmpty;
   }
 
   @override
   FutureOr<Set<String>> tableFields(String tableName, [String? schema]) async {
     String sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
-    QueryResult r = await rawQuery(sql, [schema, tableName]);
+    QueryResult r = await rawQuery(sql, [schema | defaultSchema, tableName]);
     int nameIndex = r.labelIndex("COLUMN_NAME");
     return r.map((e) => e[nameIndex] as String).toSet();
   }
@@ -74,7 +72,7 @@ class MySqlConnectionExecutor implements SQLExecutorTx {
   @override
   FutureOr<Set<String>> listIndex(String tableName, [String? schema]) async {
     String sql = "SELECT * FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
-    QueryResult r = await rawQuery(sql, [schema, tableName]);
+    QueryResult r = await rawQuery(sql, [schema | defaultSchema, tableName]);
     int nameIndex = r.labelIndex("INDEX_NAME");
     return r.map((e) => e[nameIndex] as String).toSet();
   }
@@ -82,7 +80,7 @@ class MySqlConnectionExecutor implements SQLExecutorTx {
   @override
   FutureOr<Set<String>> indexFields(String tableName, String indexName, [String? schema]) async {
     String sql = "SELECT * FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ?";
-    QueryResult r = await rawQuery(sql, [schema, tableName, indexName]);
+    QueryResult r = await rawQuery(sql, [schema | defaultSchema, tableName, indexName]);
     int nameIndex = r.labelIndex("COLUMN_NAME");
     return r.map((e) => e[nameIndex] as String).toSet();
   }

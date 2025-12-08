@@ -37,11 +37,10 @@ class PgConnectionExecutor extends PgSessionExecutor implements SQLExecutorTx {
 class PgSessionExecutor implements SQLExecutor {
   final Session session;
   final PostgresOptions? options;
-
-  PgSessionExecutor(this.session, {this.options});
-
   @override
-  DBType get dbType => DBType.postgres;
+  final String defaultSchema;
+
+  PgSessionExecutor(this.session, {this.options}) : defaultSchema = "public";
 
   @override
   FutureOr<int> lastInsertId() async {

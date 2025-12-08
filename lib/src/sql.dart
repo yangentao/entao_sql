@@ -8,7 +8,6 @@ import 'dart:typed_data';
 import 'package:entao_dutil/entao_dutil.dart';
 import 'package:entao_log/entao_log.dart';
 
-part 'utils/space_buffer.dart';
 part 'clause/clauses.dart';
 part 'clause/express.dart';
 part 'clause/ext.dart';
@@ -21,12 +20,14 @@ part 'executor.dart';
 part 'executor_ext.dart';
 part 'proto/column_proto.dart';
 part 'proto/migrate.dart';
+part 'proto/sql_migrate.dart';
 part 'proto/table_column.dart';
 part 'proto/table_model.dart';
 part 'proto/table_of.dart';
 part 'proto/table_proto.dart';
 part 'query_result.dart';
 part 'query_result_ext.dart';
+part 'utils/space_buffer.dart';
 part 'utils/sql_utils.dart';
 
 typedef FutureCallback = Future<void> Function();
@@ -38,8 +39,6 @@ typedef BlobSQL = Uint8List;
 
 typedef ModelCreator<T> = T Function(AnyMap);
 typedef ColumnValue<T extends Object> = MapEntry<T, dynamic>;
-
-enum DBType { sqlite, postgres, mysql }
 
 extension ExpressExecutorExt<T extends Express> on T {
   Future<QueryResult> query(SQLExecutor e) async => await e.rawQuery(this.sql, args);
