@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:entao_dutil/entao_dutil.dart';
-import 'package:mysql1/mysql1.dart';
+import 'package:mysql1_ext/mysql1_ext.dart';
+// import 'package:mysql1/mysql1.dart';
 
 import '../sql.dart';
 
@@ -31,15 +32,15 @@ class MySqlConnectionExecutor implements SQLExecutorTx {
   }
 
   @override
-  FutureOr<List<QueryResult>> prepareQuery(String sql, Iterable<AnyList> parametersList) async {
+  FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) async {
     List<Results> ls = await connection.queryMulti(sql, parametersList);
-    return ls.mapList((rs) => QueryResult(rs, meta: ResultMeta(rs.fields.mapIndex((i, e) => ColumnMeta(label: e.name | "[$i]"))), rawResult: rs));
+    return ls.mapList((rs) => rs.queryResult);
   }
 
   @override
   FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
     Results rs = await connection.query(sql, parameters);
-    return QueryResult(rs, meta: ResultMeta(rs.fields.mapIndex((i, e) => ColumnMeta(label: e.name | "[$i]"))), rawResult: rs);
+    return rs.queryResult;
   }
 
   @override
@@ -63,7 +64,9 @@ class MySqlConnectionExecutor implements SQLExecutorTx {
 
   @override
   FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) async {
-    R? r = await connection.transaction((c) async {
+    R? r = await connection.transaction((_) async {
+      // mysql1  pass the current connection to TransactionContext.
+      // so callback with 'this' is OK.
       return await callback(this);
     }, onError: (e) => throw (e));
     return r as R;
@@ -73,5 +76,5 @@ class MySqlConnectionExecutor implements SQLExecutorTx {
 extension on Results {
   ResultMeta get meta => ResultMeta(this.fields.mapIndex((i, e) => ColumnMeta(label: e.name | "[$i]")));
 
-  QueryResult get queryResult => QueryResult(this, meta: meta, rawResult: this);
+  QueryResult get queryResult => QueryResult(this.toList(), meta: meta, rawResult: this);
 }

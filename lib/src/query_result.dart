@@ -6,9 +6,11 @@ class QueryResult extends UnmodifiableListView<List<Object?>> {
 
   int labelIndex(String label) => meta.labelIndex(label);
 
-  QueryResult(super.source, {required this.meta, required this.rawResult});
+  QueryResult(List<List<Object?>> super.source, {required this.meta, required this.rawResult});
 
-  List<AnyMap> listMap() => this.mapIndex((_, row)=> AnyMap.fromEntries(row.mapIndex((i, e) => MapEntry(meta.columns[i].label, e))));
+  List<AnyMap> toMaps() => this.mapIndex((_, row) => AnyMap.fromEntries(row.mapIndex((i, e) => MapEntry(meta.columns[i].label, e))));
+
+  List<RowData> toRows() => this.mapList((e) => RowData(e, meta: meta));
 }
 
 class ResultMeta {

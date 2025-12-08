@@ -12,7 +12,7 @@ extension QueryResultExt on QueryResult {
 
   AnyMap? firstRow() => this.isEmpty ? null : rowAt(index: 0);
 
-  List<AnyMap> listRows() => listMap();
+  List<AnyMap> listRows() => toMaps();
 
   Object? valueAt({required int row, required int col}) => this[row][col];
 
@@ -32,7 +32,7 @@ extension QueryResultExt on QueryResult {
     if (this.isEmpty) {
       logSQL.d("[empty]");
     } else {
-      for (AnyMap row in this.listMap()) {
+      for (AnyMap row in this.toMaps()) {
         logSQL.d(row);
       }
     }

@@ -22,7 +22,7 @@ class SQliteExecutor implements SQLExecutorTx {
   }
 
   @override
-  List<QueryResult> prepareQuery(String sql, Iterable<AnyList> parametersList) {
+  List<QueryResult> multiQuery(String sql, Iterable<AnyList> parametersList) {
     List<QueryResult> ls = [];
     final st = lite.prepareSQL(sql);
     try {

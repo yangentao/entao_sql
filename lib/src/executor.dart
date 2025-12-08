@@ -4,7 +4,7 @@ abstract interface class SQLExecutor {
   DBType get dbType;
   FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]);
 
-  FutureOr<List<QueryResult>> prepareQuery(String sql, Iterable<AnyList> parametersList);
+  FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList);
 
   FutureOr<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]);
 
