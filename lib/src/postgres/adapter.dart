@@ -41,6 +41,9 @@ class PgSessionExecutor implements SQLExecutor {
   PgSessionExecutor(this.session, {this.options});
 
   @override
+  DBType get dbType => DBType.postgres;
+
+  @override
   Future<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]) async {
     Statement st = await session.prepare(sql);
     Stream<RowData> s = st.bind(parameters).map((r) => RowData(r, meta: r.schema.meta));

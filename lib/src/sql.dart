@@ -37,6 +37,10 @@ typedef BlobSQL = Uint8List;
 typedef ModelCreator<T> = T Function(AnyMap);
 typedef ColumnValue<T extends Object> = MapEntry<T, dynamic>;
 
+enum  DBType{
+  sqlite, postgres, mysql
+}
+
 final class Returning {
   final List<String> columns;
 

@@ -1,6 +1,7 @@
 part of 'sql.dart';
 
 abstract interface class SQLExecutor {
+  DBType get dbType;
   FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]);
 
   FutureOr<List<QueryResult>> prepareQuery(String sql, Iterable<AnyList> parametersList);

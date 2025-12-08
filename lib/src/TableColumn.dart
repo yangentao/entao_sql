@@ -5,10 +5,10 @@ mixin TableColumn<T extends Enum> on Enum {
   Type get tableType => T;
 
   String get tableName => exGetOrPut("tableName", () {
-    String a = "$T";
-    if (a == "Object") errorSQL("TableColumn MUST has a generic type parameter. forexample:  enum Person with TableColumn<Person> ");
-    return a;
-  });
+        String a = "$T";
+        if (a == "Object") errorSQL("TableColumn MUST has a generic type parameter. forexample:  enum Person with TableColumn<Person> ");
+        return a;
+      });
 
   List<T> get columns;
 
@@ -51,7 +51,7 @@ mixin TableColumn<T extends Enum> on Enum {
     return MapEntry<TableColumn<T>, dynamic>(this, value);
   }
 
-  String defineField(bool multiKey) {
+  String defineField(bool multiKey, DBType dbType) {
     List<String> ls = [nameSQL];
     ls << proto.type;
     if (proto.primaryKey && !multiKey) {

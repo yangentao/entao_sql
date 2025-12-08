@@ -70,6 +70,9 @@ class SQliteExecutor implements SQLExecutorTx {
   Set<String> indexFields(String indexName, [String? schema]) {
     return lite.PRAGMA.index_info(indexName, schema: schema).map((e) => e.name).toSet();
   }
+
+  @override
+  DBType get dbType => DBType.sqlite;
 }
 
 extension ResultMetaSQLite on Cursor {
