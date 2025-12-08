@@ -49,6 +49,7 @@ class MySqlConnectionExecutor implements SQLExecutorTx {
     return r as R;
   }
 
+  // TODO schema 必须!
   @override
   FutureOr<bool> tableExists(String tableName, [String? schema]) async {
     String sql = "SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";

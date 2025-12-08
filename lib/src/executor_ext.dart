@@ -207,10 +207,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     r.dump();
   }
 
-  /// liteSQL.migrate(Person.values)
-  void register<T extends TableColumn<T>>(List<T> fields, {bool migrate = true}) {
-    _registerTable(this, fields, migrate: migrate);
-  }
+
 }
 
 SpaceBuffer _insertBuffer(Object table, Iterable<Object> columns) {

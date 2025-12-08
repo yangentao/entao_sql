@@ -9,10 +9,6 @@ import 'package:entao_dutil/entao_dutil.dart';
 import 'package:entao_log/entao_log.dart';
 
 part 'SpaceBuffer.dart';
-part 'TableColumn.dart';
-part 'TableModel.dart';
-part 'TableOf.dart';
-part 'TableProto.dart';
 part 'clause/clauses.dart';
 part 'clause/express.dart';
 part 'clause/ext.dart';
@@ -23,6 +19,12 @@ part 'clause/where.dart';
 part 'configs.dart';
 part 'executor.dart';
 part 'executor_ext.dart';
+part 'proto/table_column.dart';
+part 'proto/table_model.dart';
+part 'proto/table_of.dart';
+part 'proto/migrate.dart';
+part 'proto/column_proto.dart';
+part 'proto/table_proto.dart';
 part 'query_result.dart';
 part 'query_result_ext.dart';
 part 'sql_utils.dart';
@@ -37,9 +39,7 @@ typedef BlobSQL = Uint8List;
 typedef ModelCreator<T> = T Function(AnyMap);
 typedef ColumnValue<T extends Object> = MapEntry<T, dynamic>;
 
-enum  DBType{
-  sqlite, postgres, mysql
-}
+enum DBType { sqlite, postgres, mysql }
 
 final class Returning {
   final List<String> columns;
