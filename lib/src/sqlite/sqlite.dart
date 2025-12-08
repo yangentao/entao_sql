@@ -7,11 +7,13 @@ import 'package:sqlite3/sqlite3.dart';
 import '../sql.dart';
 import 'sqlite3_ffi.dart' as xsql;
 
+part 'configs.dart';
 part 'executor.dart';
 part 'litesql.dart';
+part 'migrator.dart';
 part 'pragma.dart';
 part 'resultset.dart';
-part 'migrator.dart';
+part 'types.dart';
 
 enum InsertOption {
   abort("ABORT"),

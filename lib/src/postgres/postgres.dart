@@ -6,6 +6,7 @@ import 'package:postgres/postgres.dart' hide Type;
 import '../sql.dart';
 
 part 'migrate.dart';
+part 'types.dart';
 
 // final _endpoint = Endpoint(host: 'localhost', database: 'test', username: 'test', password: 'test');
 // final poolPG = Pool.withEndpoints([_endpoint], settings: PoolSettings(sslMode: SslMode.disable));

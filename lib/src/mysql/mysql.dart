@@ -3,11 +3,10 @@ import 'dart:async';
 import 'package:entao_dutil/entao_dutil.dart';
 import 'package:mysql1_ext/mysql1_ext.dart';
 
-// import 'package:mysql1/mysql1.dart';
-
 import '../sql.dart';
 
 part 'migrate.dart';
+part 'types.dart';
 
 Future<MySqlConnection> mysqlCreateConnection() async {
   final setting = ConnectionSettings(host: "localhost", port: 3306, user: "test", password: "test", db: "test", useSSL: false, timeout: Duration(seconds: 10));

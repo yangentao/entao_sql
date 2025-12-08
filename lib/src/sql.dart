@@ -15,7 +15,6 @@ part 'clause/func.dart';
 part 'clause/func_win.dart';
 part 'clause/joins.dart';
 part 'clause/where.dart';
-part 'configs.dart';
 part 'executor.dart';
 part 'executor_ext.dart';
 part 'proto/column_proto.dart';

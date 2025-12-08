@@ -1,4 +1,4 @@
-part of 'executor.dart';
+part of 'postgres.dart';
 
 class PgMigrator extends SQLMigrator {
   @override

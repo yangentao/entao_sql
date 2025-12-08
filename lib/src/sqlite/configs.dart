@@ -1,4 +1,4 @@
-part of 'sql.dart';
+part of 'sqlite.dart';
 
 enum Configs with TableColumn<Configs> {
   name(TEXT(primaryKey: true)),

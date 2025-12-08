@@ -1,4 +1,4 @@
 library;
 
-export 'src/mysql/executor.dart';
+export 'src/mysql/mysql.dart';
 export 'src/sql.dart';

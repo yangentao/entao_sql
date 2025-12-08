@@ -1,4 +1,4 @@
 library;
 
-export 'src/postgres/executor.dart';
+export 'src/postgres/postgres.dart';
 export 'src/sql.dart';
