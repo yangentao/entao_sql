@@ -7,7 +7,7 @@ import 'package:sqlite3/sqlite3.dart';
 import '../sql.dart';
 import 'sqlite3_ffi.dart' as xsql;
 
-part 'adapter.dart';
+part 'executor.dart';
 part 'litesql.dart';
 part 'pragma.dart';
 part 'resultset.dart';

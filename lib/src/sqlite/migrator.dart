@@ -10,6 +10,7 @@ class SQLiteMigrator extends SQLMigrator {
 class _MigratorLite extends UtilMigratorSQLite {
   final LiteSQL lite;
 
+  // ignore: unused_element_parameter
   _MigratorLite(this.lite, super.tableProto, {super.schema});
 
   @override

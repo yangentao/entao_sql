@@ -1,4 +1,4 @@
-part of 'adapter.dart';
+part of 'executor.dart';
 
 class PgMigrator extends SQLMigrator {
   @override
@@ -10,6 +10,7 @@ class PgMigrator extends SQLMigrator {
 class _MigratorLite extends UtilMigratorSQLite {
   final SQLExecutor executor;
 
+  // ignore: unused_element_parameter
   _MigratorLite(this.executor, super.tableProto, {super.schema = 'public'});
 
   @override

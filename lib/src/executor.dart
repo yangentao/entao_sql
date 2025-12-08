@@ -13,14 +13,6 @@ abstract class SQLExecutor {
   FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList);
 
   FutureOr<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]);
-
-  FutureOr<bool> tableExists(String tableName, [String? schema]);
-
-  FutureOr<Set<String>> tableFields(String tableName, [String? schema]);
-
-  FutureOr<Set<String>> listIndex(String tableName, [String? schema]);
-
-  FutureOr<Set<String>> indexFields(String tableName, String indexName, [String? schema]);
 }
 
 abstract class SQLExecutorTx extends SQLExecutor {

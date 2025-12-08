@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:entao_dutil/entao_dutil.dart';
 import 'package:entao_log/entao_log.dart';
 
+part 'basic_migrator.dart';
 part 'clause/clauses.dart';
 part 'clause/express.dart';
 part 'clause/ext.dart';
@@ -25,7 +26,6 @@ part 'proto/table_of.dart';
 part 'proto/table_proto.dart';
 part 'query_result.dart';
 part 'query_result_ext.dart';
-part 'migrate/basic_migrator.dart';
 part 'utils/space_buffer.dart';
 part 'utils/sql_utils.dart';
 

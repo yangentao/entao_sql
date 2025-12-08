@@ -1,4 +1,4 @@
-part of 'adapter.dart';
+part of 'executor.dart';
 
 class MySQLMigrator extends SQLMigrator {
   final String database;

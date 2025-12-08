@@ -1,6 +1,5 @@
 part of 'sqlite.dart';
 
-
 class SQliteExecutor extends SQLExecutorTx {
   LiteSQL lite;
 
@@ -57,26 +56,6 @@ class SQliteExecutor extends SQLExecutorTx {
 
   Set<String> listTable([String? schema]) {
     return lite.PRAGMA.table_list(schema: schema).map((e) => e.name).toSet();
-  }
-
-  @override
-  bool tableExists(String tableName, [String? schema]) {
-    return lite.existTable(tableName);
-  }
-
-  @override
-  Set<String> tableFields(String tableName, [String? schema]) {
-    return lite.PRAGMA.table_info(tableName, schema: schema).map((e) => e.name).toSet();
-  }
-
-  @override
-  Set<String> listIndex(String tableName, [String? schema]) {
-    return lite.PRAGMA.index_list(tableName, schema: schema).map((e) => e.name).toSet();
-  }
-
-  @override
-  Set<String> indexFields(String tableName, String indexName, [String? schema]) {
-    return lite.PRAGMA.index_info(indexName, schema: schema).map((e) => e.name).toSet();
   }
 }
 

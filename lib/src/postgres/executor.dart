@@ -4,7 +4,9 @@ import 'package:entao_dutil/entao_dutil.dart';
 import 'package:postgres/postgres.dart' hide Type;
 
 import '../sql.dart';
+
 part 'migrate.dart';
+
 // final _endpoint = Endpoint(host: 'localhost', database: 'test', username: 'test', password: 'test');
 // final poolPG = Pool.withEndpoints([_endpoint], settings: PoolSettings(sslMode: SslMode.disable));
 
@@ -73,47 +75,6 @@ class PgSessionExecutor extends SQLExecutor {
 
   Future<Set<String>> listTable([String? schema]) async {
     QueryResult r = await rawQuery("SELECT tablename FROM pg_tables WHERE schemaname=?", [schema ?? "public"]);
-    return r.map((e) => e[0] as String).toSet();
-  }
-
-  @override
-  Future<bool> tableExists(String tableName, [String? schema]) async {
-    QueryResult r = await rawQuery("SELECT 1 FROM pg_tables WHERE schemaname=? AND tablename=?", [schema ?? "public", tableName]);
-    return r.isNotEmpty;
-  }
-
-  @override
-  Future<Set<String>> tableFields(String tableName, [String? schema]) async {
-    String sql = '''
-    SELECT a.attname AS field
-    FROM pg_class c JOIN pg_attribute a ON a.attrelid = c.oid , pg_namespace as n
-    WHERE n.nspname = ? 
-    AND c.relname = ?
-    AND c.relnamespace = n.oid
-    AND a.attnum > 0
-    ''';
-    QueryResult r = await rawQuery(sql, [schema ?? "public", tableName]);
-    return r.map((e) => e[0] as String).toSet();
-  }
-
-  @override
-  Future<Set<String>> listIndex(String tableName, [String? schema]) async {
-    QueryResult r = await rawQuery("SELECT indexname FROM pg_indexes WHERE schemaname=? AND tablename=?", [schema ?? "public", tableName]);
-    return r.map((e) => e[0] as String).toSet();
-  }
-
-  @override
-  Future<Set<String>> indexFields(String tableName, String indexName, [String? schema]) async {
-    String sql = '''
-    SELECT a.attname AS field
-    FROM pg_class c JOIN pg_attribute a ON a.attrelid = c.oid , pg_namespace as n
-    WHERE n.nspname = ? 
-    AND c.relname = ?
-    AND c.relnamespace = n.oid
-    AND c.relkind ='i'
-    AND a.attnum > 0
-    ''';
-    QueryResult r = await rawQuery(sql, [schema ?? "public", indexName]);
     return r.map((e) => e[0] as String).toSet();
   }
 }
