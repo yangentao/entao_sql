@@ -72,7 +72,7 @@ Future<void> _migrateTable(SQLExecutor executor, String tableName, List<TableCol
   Set<String> idxSet = {};
   Set<String> idxs = await executor.listIndex(tableName);
   for (String idx in idxs) {
-    final fs = await executor.indexFields(idx);
+    final fs = await executor.indexFields(tableName, idx);
     idxSet.addAll(fs);
   }
   for (TableColumn f in fields) {

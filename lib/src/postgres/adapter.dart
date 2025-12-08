@@ -100,7 +100,7 @@ class PgSessionExecutor implements SQLExecutor {
   }
 
   @override
-  Future<Set<String>> indexFields(String indexName, [String? schema]) async {
+  Future<Set<String>> indexFields(String tableName, String indexName, [String? schema]) async {
     String sql = '''
     SELECT a.attname AS field
     FROM pg_class c JOIN pg_attribute a ON a.attrelid = c.oid , pg_namespace as n

@@ -14,7 +14,7 @@ abstract interface class SQLExecutor {
 
   FutureOr<Set<String>> listIndex(String tableName, [String? schema]);
 
-  FutureOr<Set<String>> indexFields(String indexName, [String? schema]);
+  FutureOr<Set<String>> indexFields(String tableName, String indexName, [String? schema]);
 }
 
 abstract interface class SQLExecutorTx implements SQLExecutor {

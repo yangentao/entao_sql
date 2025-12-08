@@ -68,7 +68,7 @@ class SQliteExecutor implements SQLExecutorTx {
   }
 
   @override
-  Set<String> indexFields(String indexName, [String? schema]) {
+  Set<String> indexFields(String tableName, String indexName, [String? schema]) {
     return lite.PRAGMA.index_info(indexName, schema: schema).map((e) => e.name).toSet();
   }
 

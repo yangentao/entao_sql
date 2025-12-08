@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:entao_dutil/entao_dutil.dart';
 import 'package:mysql1_ext/mysql1_ext.dart';
+
 // import 'package:mysql1/mysql1.dart';
 
 import '../sql.dart';
@@ -18,18 +19,6 @@ class MySqlConnectionExecutor implements SQLExecutorTx {
 
   @override
   DBType get dbType => DBType.mysql;
-
-  @override
-  FutureOr<Set<String>> indexFields(String indexName, [String? schema]) {
-    // TODO: implement indexFields
-    throw UnimplementedError();
-  }
-
-  @override
-  FutureOr<Set<String>> listIndex(String tableName, [String? schema]) {
-    // TODO: implement listIndex
-    throw UnimplementedError();
-  }
 
   @override
   FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) async {
@@ -51,18 +40,6 @@ class MySqlConnectionExecutor implements SQLExecutorTx {
   }
 
   @override
-  FutureOr<bool> tableExists(String tableName, [String? schema]) {
-    // TODO: implement tableExists
-    throw UnimplementedError();
-  }
-
-  @override
-  FutureOr<Set<String>> tableFields(String tableName, [String? schema]) {
-    // TODO: implement tableFields
-    throw UnimplementedError();
-  }
-
-  @override
   FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) async {
     R? r = await connection.transaction((_) async {
       // mysql1  pass the current connection to TransactionContext.
@@ -70,6 +47,37 @@ class MySqlConnectionExecutor implements SQLExecutorTx {
       return await callback(this);
     }, onError: (e) => throw (e));
     return r as R;
+  }
+
+  @override
+  FutureOr<bool> tableExists(String tableName, [String? schema]) async {
+    String sql = "SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
+    QueryResult r = await rawQuery(sql, [schema, tableName]);
+    return r.isNotEmpty;
+  }
+
+  @override
+  FutureOr<Set<String>> tableFields(String tableName, [String? schema]) async {
+    String sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
+    QueryResult r = await rawQuery(sql, [schema, tableName]);
+    int nameIndex = r.labelIndex("COLUMN_NAME");
+    return r.map((e) => e[nameIndex] as String).toSet();
+  }
+
+  @override
+  FutureOr<Set<String>> listIndex(String tableName, [String? schema]) async {
+    String sql = "SELECT * FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
+    QueryResult r = await rawQuery(sql, [schema, tableName]);
+    int nameIndex = r.labelIndex("INDEX_NAME");
+    return r.map((e) => e[nameIndex] as String).toSet();
+  }
+
+  @override
+  FutureOr<Set<String>> indexFields(String tableName, String indexName, [String? schema]) async  {
+    String sql = "SELECT * FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ?";
+    QueryResult r = await rawQuery(sql, [schema, tableName, indexName]);
+    int nameIndex = r.labelIndex("COLUMN_NAME");
+    return r.map((e) => e[nameIndex] as String).toSet();
   }
 }
 
