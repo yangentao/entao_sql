@@ -28,3 +28,22 @@ abstract class SQLExecutorTx extends SQLExecutor {
 
   FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback);
 }
+
+abstract class SQLMigrator {
+  Future<void> migrate<T extends TableColumn<T>>(SQLExecutor executor, TableProto<T> tableProto);
+}
+
+extension ExecutorTableExt on SQLExecutor {
+  /// register(Person.values)
+  Future<void> register<T extends TableColumn<T>>(List<T> fields, {bool migrate = true}) async {
+    assert(fields.isNotEmpty);
+    if (TableProto.isRegisted<T>()) return;
+    final tab = TableProto<T>._(fields.first.tableName, fields, executor: this);
+    if (migrate) {
+      SQLMigrator? m = this.migrator;
+      if (m != null) {
+        await m.migrate(this, tab);
+      }
+    }
+  }
+}

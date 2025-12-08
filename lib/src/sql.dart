@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:core';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:entao_dutil/entao_dutil.dart';
@@ -19,7 +18,6 @@ part 'configs.dart';
 part 'executor.dart';
 part 'executor_ext.dart';
 part 'proto/column_proto.dart';
-part 'proto/migrate.dart';
 part 'proto/migrator.dart';
 part 'proto/table_column.dart';
 part 'proto/table_model.dart';

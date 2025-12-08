@@ -11,11 +11,11 @@ class TableProto<E extends TableColumn> {
     for (var e in columns) {
       e.tableProto = this;
     }
-    _enumTypeMap[E] = this;
+    _tableRegisterMap[E] = this;
   }
 
   factory TableProto() {
-    TableProto? p = _enumTypeMap[E];
+    TableProto? p = _tableRegisterMap[E];
     if (p == null) {
       errorSQL("NO table proto of '$E' found, migrate it first. for example: liteSQL.migrate(Person.values) ");
     }
@@ -28,16 +28,16 @@ class TableProto<E extends TableColumn> {
 
   // after migrate
   static TableProto of(Type type) {
-    TableProto? p = _enumTypeMap[type];
+    TableProto? p = _tableRegisterMap[type];
     if (p == null) {
       errorSQL("NO table proto of $type  found, migrate it first. ");
     }
     return p;
   }
 
-  static bool isMigrated<T>() => _enumTypeMap.containsKey(T);
+  static bool isRegisted<T>() => _tableRegisterMap.containsKey(T);
 
-  static final Map<Type, TableProto> _enumTypeMap = {};
+  static final Map<Type, TableProto> _tableRegisterMap = {};
 }
 
 TableProto $(Type type) => TableProto.of(type);

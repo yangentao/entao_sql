@@ -50,35 +50,6 @@ mixin TableColumn<T extends Enum> on Enum {
   MapEntry<TableColumn<T>, dynamic> operator >>(dynamic value) {
     return MapEntry<TableColumn<T>, dynamic>(this, value);
   }
-
-  String defineField(bool multiKey ) {
-    List<String> ls = [nameSQL];
-    ls << proto.type;
-    if (proto.primaryKey && !multiKey) {
-      ls << "PRIMARY KEY";
-      if (proto.autoInc) {
-        ls << "AUTOINCREMENT";
-      }
-    }
-    if (!proto.primaryKey && !multiKey) {
-      if (proto.unique) {
-        ls << "UNIQUE";
-      }
-      if (proto.notNull) {
-        ls << "NOT NULL";
-      }
-    }
-    if (proto.defaultValue != null && proto.defaultValue!.isNotEmpty) {
-      ls << "DEFAULT ${proto.defaultValue}";
-    }
-    if (proto.check != null && proto.check!.isNotEmpty) {
-      ls << "CHECK (${proto.check})";
-    }
-    if (proto.extras.notBlank) {
-      ls << proto.extras!;
-    }
-    return ls.join(" ");
-  }
 }
 
 final Map<Enum, Map<String, dynamic>> _columnPropMap = {};
