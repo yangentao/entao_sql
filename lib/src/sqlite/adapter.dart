@@ -1,5 +1,6 @@
 part of 'sqlite.dart';
 
+
 class SQliteExecutor extends SQLExecutorTx {
   LiteSQL lite;
 

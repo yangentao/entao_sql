@@ -4,7 +4,7 @@ class ColumnProto {
   final String? rename;
   final String type;
   final bool primaryKey;
-  final bool autoInc; //AUTOINCREMENT
+  final int autoInc; //AUTOINCREMENT
   final bool unique;
   final bool notNull;
   final bool index;
@@ -18,7 +18,7 @@ class ColumnProto {
     required this.type,
     this.primaryKey = false,
     this.notNull = false,
-    this.autoInc = false,
+    this.autoInc = 0,
     this.unique = false,
     this.index = false,
     this.check,
@@ -35,7 +35,7 @@ class INTEGER extends ColumnProto {
     super.type = "INTEGER",
     super.primaryKey = false,
     super.notNull = false,
-    super.autoInc = false,
+    super.autoInc = 0,
     super.unique = false,
     super.index = false,
     super.check,

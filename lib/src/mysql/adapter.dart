@@ -7,6 +7,8 @@ import 'package:mysql1_ext/mysql1_ext.dart';
 
 import '../sql.dart';
 
+part 'migrate.dart';
+
 Future<MySqlConnection> mysqlCreateConnection() async {
   final setting = ConnectionSettings(host: "localhost", port: 3306, user: "test", password: "test", db: "test", useSSL: false, timeout: Duration(seconds: 10));
   return await MySqlConnection.connect(setting);
@@ -26,13 +28,13 @@ class MySqlConnectionExecutor extends SQLExecutorTx {
   @override
   FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) async {
     List<Results> ls = await connection.queryMulti(sql, parametersList);
-    return ls.mapList((rs) => rs.queryResult(affectedRows: rs.affectedRows ?? 0, lastInsertId: 0));
+    return ls.mapList((rs) => rs.queryResult());
   }
 
   @override
   FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
     Results rs = await connection.query(sql, parameters);
-    return rs.queryResult(affectedRows: rs.affectedRows ?? 0, lastInsertId: 0);
+    return rs.queryResult();
   }
 
   @override
@@ -87,6 +89,5 @@ class MySqlConnectionExecutor extends SQLExecutorTx {
 extension on Results {
   ResultMeta get meta => ResultMeta(this.fields.mapIndex((i, e) => ColumnMeta(label: e.name | "[$i]")));
 
-  QueryResult queryResult({int affectedRows = 0, int lastInsertId = 0}) =>
-      QueryResult(this.toList(), meta: meta, rawResult: this, affectedRows: affectedRows, lastInsertId: lastInsertId);
+  QueryResult queryResult() => QueryResult(this.toList(), meta: meta, rawResult: this, affectedRows: this.affectedRows ?? 0, lastInsertId: this.insertId ?? 0);
 }

@@ -4,7 +4,7 @@ import 'package:entao_dutil/entao_dutil.dart';
 import 'package:postgres/postgres.dart' hide Type;
 
 import '../sql.dart';
-
+part 'migrate.dart';
 // final _endpoint = Endpoint(host: 'localhost', database: 'test', username: 'test', password: 'test');
 // final poolPG = Pool.withEndpoints([_endpoint], settings: PoolSettings(sslMode: SslMode.disable));
 

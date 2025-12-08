@@ -25,6 +25,7 @@ part 'proto/table_of.dart';
 part 'proto/table_proto.dart';
 part 'query_result.dart';
 part 'query_result_ext.dart';
+part 'migrate/basic_migrator.dart';
 part 'utils/space_buffer.dart';
 part 'utils/sql_utils.dart';
 
