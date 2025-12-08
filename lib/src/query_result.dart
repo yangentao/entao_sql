@@ -1,12 +1,14 @@
 part of 'sql.dart';
 
 class QueryResult extends UnmodifiableListView<List<Object?>> {
-  final Object rawResult;
+  final int affectedRows;
+  final int lastInsertId;
   final ResultMeta meta;
+  final Object? rawResult;
 
   int labelIndex(String label) => meta.labelIndex(label);
 
-  QueryResult(List<List<Object?>> super.source, {required this.meta, required this.rawResult});
+  QueryResult(List<List<Object?>> super.source, {required this.meta, this.rawResult, this.affectedRows = 0, this.lastInsertId = 0});
 
   List<AnyMap> toMaps() => this.mapIndex((_, row) => AnyMap.fromEntries(row.mapIndex((i, e) => MapEntry(meta.columns[i].label, e))));
 

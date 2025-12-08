@@ -53,7 +53,7 @@ class PgSessionExecutor implements SQLExecutor {
   @override
   Future<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
     Result r = await session.execute(sql, parameters: parameters, timeout: options?.timeout, queryMode: options?.queryMode);
-    return r.queryResult;
+    return r.queryResult(affectedRows: r.affectedRows);
   }
 
   @override
@@ -62,7 +62,7 @@ class PgSessionExecutor implements SQLExecutor {
     Statement st = await session.prepare(sql);
     for (final params in parametersList) {
       Result r = await st.run(params, timeout: options?.timeout);
-      ls << r.queryResult;
+      ls << r.queryResult(affectedRows: r.affectedRows);
     }
     st.dispose();
     return ls;
@@ -126,7 +126,7 @@ class PostgresOptions {
 extension ResultMetaPGExt on Result {
   ResultMeta get meta => this.schema.meta;
 
-  QueryResult get queryResult => QueryResult(this, meta: meta, rawResult: this);
+  QueryResult queryResult({int affectedRows = 0}) => QueryResult(this, meta: meta, rawResult: this, affectedRows: this.affectedRows);
 }
 
 extension ResultMetaResultSchemaExt on ResultSchema {

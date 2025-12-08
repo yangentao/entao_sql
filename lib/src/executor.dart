@@ -20,12 +20,3 @@ abstract interface class SQLExecutor {
 abstract interface class SQLExecutorTx implements SQLExecutor {
   FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback);
 }
-
-extension ExpressExecutorExt<T extends Express> on T {
-  Future<QueryResult> query(SQLExecutor e) async => await e.rawQuery(this.sql, args);
-}
-
-String makeIndexName(String table, List<String> fields) {
-  var ls = fields.sorted(null);
-  return "${table}_${ls.join("_")}";
-}

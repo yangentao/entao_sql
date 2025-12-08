@@ -23,13 +23,13 @@ class MySqlConnectionExecutor implements SQLExecutorTx {
   @override
   FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) async {
     List<Results> ls = await connection.queryMulti(sql, parametersList);
-    return ls.mapList((rs) => rs.queryResult);
+    return ls.mapList((rs) => rs.queryResult(affectedRows: rs.affectedRows ?? 0, lastInsertId: 0));
   }
 
   @override
   FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
     Results rs = await connection.query(sql, parameters);
-    return rs.queryResult;
+    return rs.queryResult(affectedRows: rs.affectedRows ?? 0, lastInsertId: 0);
   }
 
   @override
@@ -74,7 +74,7 @@ class MySqlConnectionExecutor implements SQLExecutorTx {
   }
 
   @override
-  FutureOr<Set<String>> indexFields(String tableName, String indexName, [String? schema]) async  {
+  FutureOr<Set<String>> indexFields(String tableName, String indexName, [String? schema]) async {
     String sql = "SELECT * FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ?";
     QueryResult r = await rawQuery(sql, [schema, tableName, indexName]);
     int nameIndex = r.labelIndex("COLUMN_NAME");
@@ -85,5 +85,6 @@ class MySqlConnectionExecutor implements SQLExecutorTx {
 extension on Results {
   ResultMeta get meta => ResultMeta(this.fields.mapIndex((i, e) => ColumnMeta(label: e.name | "[$i]")));
 
-  QueryResult get queryResult => QueryResult(this.toList(), meta: meta, rawResult: this);
+  QueryResult queryResult({int affectedRows = 0, int lastInsertId = 0}) =>
+      QueryResult(this.toList(), meta: meta, rawResult: this, affectedRows: affectedRows, lastInsertId: lastInsertId);
 }

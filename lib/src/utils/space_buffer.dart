@@ -1,4 +1,4 @@
-part of 'sql.dart';
+part of '../sql.dart';
 
 extension type SpaceBuffer.buf(StringBuffer buffer) implements StringBuffer {
   SpaceBuffer([String s = ""]) : this.buf(StringBuffer(s));

@@ -7,6 +7,7 @@ class SQliteExecutor implements SQLExecutorTx {
 
   @override
   Stream<RowData> streamQuery(String sql, [AnyList? parameters]) async* {
+    lite.lastInsertRowId = 0;
     PreparedStatement ps = lite.prepareSQL(sql);
     IteratingCursor ic = ps.selectCursor(parameters ?? const []);
     ResultMeta meta = ic.meta;
@@ -18,7 +19,8 @@ class SQliteExecutor implements SQLExecutorTx {
 
   @override
   QueryResult rawQuery(String sql, [AnyList? parameters]) {
-    return lite.rawQuery(sql, parameters).queryResult;
+    lite.lastInsertRowId = 0;
+    return lite.rawQuery(sql, parameters).queryResult(affectedRows: lite.updatedRows, lastInsertId: lite.lastInsertRowId);
   }
 
   @override
@@ -27,7 +29,8 @@ class SQliteExecutor implements SQLExecutorTx {
     final st = lite.prepareSQL(sql);
     try {
       for (var params in parametersList) {
-        ls << st.select(params.toList()).queryResult;
+        lite.lastInsertRowId = 0;
+        ls << st.select(params.toList()).queryResult(affectedRows: lite.updatedRows, lastInsertId: lite.lastInsertRowId);
       }
     } finally {
       st.close();
@@ -39,9 +42,9 @@ class SQliteExecutor implements SQLExecutorTx {
   FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) async {
     lite.execute("BEGIN");
     try {
-      final r =  await callback(this);
+      final r = await callback(this);
       lite.execute("COMMIT");
-      return r ;
+      return r;
     } catch (e) {
       lite.execute("ROLLBACK");
       rethrow;
@@ -81,7 +84,7 @@ extension ResultMetaSQLite on Cursor {
 }
 
 extension ResultSetQueryResult on ResultSet {
-  QueryResult get queryResult {
-    return QueryResult(rows, meta: meta, rawResult: this);
+  QueryResult queryResult({int affectedRows = 0, int lastInsertId = 0}) {
+    return QueryResult(rows, meta: meta, rawResult: this, affectedRows: affectedRows, lastInsertId: lastInsertId);
   }
 }
