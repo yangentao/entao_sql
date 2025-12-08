@@ -107,6 +107,7 @@ class PgSessionExecutor implements SQLExecutor {
     WHERE n.nspname = ? 
     AND c.relname = ?
     AND c.relnamespace = n.oid
+    AND c.relkind ='i'
     AND a.attnum > 0
     ''';
     QueryResult r = await rawQuery(sql, [schema ?? "public", indexName]);
