@@ -23,7 +23,7 @@ class SQliteExecutor extends SQLExecutorTx {
   @override
   QueryResult rawQuery(String sql, [AnyList? parameters]) {
     lite.lastInsertRowId = 0;
-    return lite.rawQuery(sql, parameters).queryResult(affectedRows: lite.updatedRows, lastInsertId: lite.lastInsertRowId);
+    return lite.rawQuery(sql, parameters).queryResult(affectedRows: lite.updatedRows);
   }
 
   @override
@@ -33,7 +33,7 @@ class SQliteExecutor extends SQLExecutorTx {
     try {
       for (var params in parametersList) {
         lite.lastInsertRowId = 0;
-        ls << st.select(params.toList()).queryResult(affectedRows: lite.updatedRows, lastInsertId: lite.lastInsertRowId);
+        ls << st.select(params.toList()).queryResult(affectedRows: lite.updatedRows);
       }
     } finally {
       st.close();
@@ -64,7 +64,7 @@ extension ResultMetaSQLite on Cursor {
 }
 
 extension ResultSetQueryResult on ResultSet {
-  QueryResult queryResult({int affectedRows = 0, int lastInsertId = 0}) {
-    return QueryResult(rows, meta: meta, rawResult: this, affectedRows: affectedRows, lastInsertId: lastInsertId);
+  QueryResult queryResult({int affectedRows = 0}) {
+    return QueryResult(rows, meta: meta, rawResult: this, affectedRows: affectedRows);
   }
 }

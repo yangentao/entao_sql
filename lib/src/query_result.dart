@@ -2,13 +2,12 @@ part of 'sql.dart';
 
 class QueryResult extends UnmodifiableListView<List<Object?>> {
   final int affectedRows;
-  final int lastInsertId;
   final ResultMeta meta;
   final Object? rawResult;
 
   int labelIndex(String label) => meta.labelIndex(label);
 
-  QueryResult(List<List<Object?>> super.source, {required this.meta, this.rawResult, this.affectedRows = 0, this.lastInsertId = 0});
+  QueryResult(List<List<Object?>> super.source, {required this.meta, this.rawResult, this.affectedRows = 0});
 }
 
 class ResultMeta {
