@@ -25,7 +25,7 @@ enum Person with TableColumn<Person> {
 }
 
 void main() {
-  test("array", () async {
+  test("time", () async {
     final ex = await _createExecutor();
     ex.rawQuery("DROP TABLE Person ");
     await ex.register(Person.values, migrate: true);
