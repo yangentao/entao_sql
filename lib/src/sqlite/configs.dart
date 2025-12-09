@@ -2,8 +2,8 @@ part of 'sqlite.dart';
 
 enum Configs with TableColumn<Configs> {
   name(TEXT(primaryKey: true)),
-  nValue(INT64()),
-  fValue(REAL64()),
+  nValue(BIGINT()),
+  fValue(DOUBLE()),
   sValue(TEXT());
 
   const Configs(this.proto);
