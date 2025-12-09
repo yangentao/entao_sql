@@ -58,7 +58,6 @@ class BOOLEAN extends ColumnProto {
 
 class TIMESTAMP extends ColumnProto {
   const TIMESTAMP({
-    bool zone = false,
     super.name,
     super.primaryKey = false,
     super.notNull = false,
@@ -68,12 +67,25 @@ class TIMESTAMP extends ColumnProto {
     super.uniqueName,
     super.defaultValue,
     super.extras,
-  }) : super(type: zone ? "TIMESTAMPZ" : "TIMESTAMP");
+  }) : super(type: "TIMESTAMP");
+}
+
+class TIMESTAMPZ extends ColumnProto {
+  const TIMESTAMPZ({
+    super.name,
+    super.primaryKey = false,
+    super.notNull = false,
+    super.unique = false,
+    super.index = false,
+    super.check,
+    super.uniqueName,
+    super.defaultValue,
+    super.extras,
+  }) : super(type: "TIMESTAMPZ");
 }
 
 class TIME extends ColumnProto {
   const TIME({
-    bool zone = false,
     super.name,
     super.primaryKey = false,
     super.notNull = false,
@@ -83,7 +95,21 @@ class TIME extends ColumnProto {
     super.uniqueName,
     super.defaultValue,
     super.extras,
-  }) : super(type: zone ? "TIMEZ" : "TIME");
+  }) : super(type: "TIME");
+}
+
+class TIMEZ extends ColumnProto {
+  const TIMEZ({
+    super.name,
+    super.primaryKey = false,
+    super.notNull = false,
+    super.unique = false,
+    super.index = false,
+    super.check,
+    super.uniqueName,
+    super.defaultValue,
+    super.extras,
+  }) : super(type: "TIMEZ");
 }
 
 class DATE extends ColumnProto {
@@ -205,8 +231,8 @@ class NUMERIC extends ColumnProto {
   }) : super(type: "NUMERIC($p, $s)");
 }
 
-class INT64 extends ColumnProto {
-  const INT64({
+class LONG extends ColumnProto {
+  const LONG({
     super.name,
     super.primaryKey = false,
     super.notNull = false,
@@ -246,5 +272,24 @@ class ARRAY<T extends Object> extends ColumnProto {
     super.uniqueName,
     super.defaultValue,
     super.extras,
-  }) : super(type: T == Object ? "ARRAY" : "$T[]");
+  }) : super(
+            type: T == Object
+                ? "ARRAY"
+                : (T == int || T == LONG)
+                    ? "BIGINT[]"
+                    : (T == double || T == DOUBLE)
+                        ? "FLOAT[]"
+                        : T == num
+                            ? "NUMERIC[]"
+                            : (T == bool || T == BOOLEAN)
+                                ? "BOOL[]"
+                                : (T == String || T == TEXT)
+                                    ? "TEXT[]"
+                                    : T == BLOB
+                                        ? "BYTEA[]"
+                                        : T == FLOAT32
+                                            ? "REAL[]"
+                                            : T == INT32
+                                                ? "INTEGER[]"
+                                                : "$T[]");
 }
