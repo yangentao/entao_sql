@@ -198,16 +198,14 @@ extension LiteSqlInsertExt on SQLExecutor {
     return await rawQuery(buf.toString(), argList);
   }
 
-  void dump(Type table) {
-    dumpTable(_tableNameOf(table));
+  Future<void> dump(Type table) async {
+    await dumpTable(_tableNameOf(table));
   }
 
   Future<void> dumpTable(String table) async {
     final r = await rawQuery("SELECT * FROM ${table.escapeSQL}");
     r.dump();
   }
-
-
 }
 
 SpaceBuffer _insertBuffer(Object table, Iterable<Object> columns) {

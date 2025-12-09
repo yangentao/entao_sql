@@ -11,7 +11,7 @@ class MySQLMigrator extends SQLMigrator {
   }
 }
 
-class _MigratorLite extends UtilMigratorSQLite {
+class _MigratorLite extends UtilMigratorMySQL {
   final SQLExecutor executor;
 
   _MigratorLite(this.executor, super.tableProto, {required String super.schema});

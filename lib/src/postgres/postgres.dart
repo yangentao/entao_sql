@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:entao_dutil/entao_dutil.dart';
 import 'package:postgres/postgres.dart' hide Type;
+import 'package:println/println.dart';
 
 import '../sql.dart';
 
@@ -14,7 +15,7 @@ part 'types.dart';
 class PgPoolExecutor<T> extends PgSessionExecutor implements SQLExecutorTx {
   Pool<T> pool;
 
-  PgPoolExecutor(this.pool, {PostgresOptions? options}) : super(pool, options: options);
+  PgPoolExecutor(this.pool, {PostgresOptions? options, super.migrator}) : super(pool, options: options);
 
   @override
   FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) {
@@ -27,7 +28,7 @@ class PgPoolExecutor<T> extends PgSessionExecutor implements SQLExecutorTx {
 class PgConnectionExecutor extends PgSessionExecutor implements SQLExecutorTx {
   Connection connection;
 
-  PgConnectionExecutor(this.connection, {PostgresOptions? options}) : super(connection, options: options);
+  PgConnectionExecutor(this.connection, {PostgresOptions? options, super.migrator}) : super(connection, options: options);
 
   @override
   FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) {
@@ -51,21 +52,33 @@ class PgSessionExecutor extends SQLExecutor {
 
   @override
   Future<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]) async {
-    Statement st = await session.prepare(sql);
+    logSQL.d("streamQuery SQL: ", sql);
+    if (parameters?.isNotEmpty == true) {
+      logSQL.d(">>>>", parameters);
+    }
+    Statement st = await session.prepare(sql.paramPositioned);
     Stream<RowData> s = st.bind(parameters).map((r) => RowData(r, meta: r.schema.meta));
     return s.whenComplete(() => st.dispose());
   }
 
   @override
   Future<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
-    Result r = await session.execute(sql, parameters: parameters, timeout: options?.timeout, queryMode: options?.queryMode);
+    logSQL.d("rawQuery SQL: ", sql);
+    if (parameters?.isNotEmpty == true) {
+      logSQL.d(">>>>", parameters);
+    }
+    Result r = await session.execute(sql.paramPositioned, parameters: parameters, timeout: options?.timeout, queryMode: options?.queryMode);
     return r.queryResult(affectedRows: r.affectedRows);
   }
 
   @override
   Future<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) async {
+    logSQL.d("multiQuery SQL: ", sql);
+    if (parametersList.isNotEmpty == true) {
+      logSQL.d(">>>>", parametersList);
+    }
     List<QueryResult> ls = [];
-    Statement st = await session.prepare(sql);
+    Statement st = await session.prepare(sql.paramPositioned);
     for (final params in parametersList) {
       Result r = await st.run(params, timeout: options?.timeout);
       ls << r.queryResult(affectedRows: r.affectedRows);
@@ -96,4 +109,20 @@ extension ResultMetaPGExt on Result {
 
 extension ResultMetaResultSchemaExt on ResultSchema {
   ResultMeta get meta => ResultMeta(this.columns.mapIndex((i, e) => ColumnMeta(label: e.columnName ?? "[$i]", typeId: e.typeOid)));
+}
+
+extension on String {
+  String get paramPositioned {
+    StringBuffer buf = StringBuffer();
+    int i = 1;
+    for (int c in this.codeUnits) {
+      if (c == CharCode.QUEST) {
+        buf.writeCharCode(CharCode.DOLLAR);
+        buf.write("${i++}");
+      } else {
+        buf.writeCharCode(c);
+      }
+    }
+    return buf.toString();
+  }
 }

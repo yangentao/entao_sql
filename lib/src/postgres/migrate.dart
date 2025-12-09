@@ -3,11 +3,12 @@ part of 'postgres.dart';
 class PgMigrator extends SQLMigrator {
   @override
   Future<void> migrate<T extends TableColumn<T>>(SQLExecutor executor, TableProto<T> tableProto) async {
+    println("migrate",tableProto.name);
     await _MigratorLite(executor, tableProto).migrate();
   }
 }
 
-class _MigratorLite extends UtilMigratorSQLite {
+class _MigratorLite extends UtilMigratorPostgres {
   final SQLExecutor executor;
 
   // ignore: unused_element_parameter
@@ -20,7 +21,8 @@ class _MigratorLite extends UtilMigratorSQLite {
 
   @override
   Future<bool> tableExists() async {
-    QueryResult r = await execute("SELECT 1 FROM pg_tables WHERE schemaname=? AND tablename=?", [schema ?? "public", tableName]);
+    println("tableExists()");
+    QueryResult r = await execute(r"SELECT 1 FROM pg_tables WHERE schemaname=$1 AND tablename=$2", [schema ?? "public", tableName]);
     return r.isNotEmpty;
   }
 
