@@ -13,7 +13,8 @@ dependencies:
   sqlite3: ^3.1.1
   postgres: ^3.5.9
 #  mysql1: ^0.20.0
-  mysql1_ext: ^0.0.4
+#  mysql1_ext: ^0.0.4
+  mysql_client_plus: ^0.1.2
   println: ^1.0.4
   entao_dutil: ^2.3.1
   entao_log: ^1.2.8

@@ -1,7 +1,7 @@
 import 'package:entao_sql/postgres.dart';
 import 'package:test/test.dart';
 
-void main() {
+void main()  async {
   test("array", () {
     expect(ARRAY().type, "ARRAY");
     expect(ARRAY<bool>().type, "BOOL[]");

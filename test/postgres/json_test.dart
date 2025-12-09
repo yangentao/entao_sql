@@ -24,7 +24,7 @@ enum Person with TableColumn<Person> {
   List<Person> get columns => Person.values;
 }
 
-void main() {
+void main() async  {
   test("json", () async {
     final ex = await _createExecutor();
     ex.rawQuery("DROP TABLE Person ");

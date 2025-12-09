@@ -1,20 +1,25 @@
 import 'dart:async';
 
 import 'package:entao_dutil/entao_dutil.dart';
-import 'package:mysql1_ext/mysql1_ext.dart';
+import 'package:mysql_client_plus/mysql_client_plus.dart';
 
 import '../sql.dart';
 
 part 'migrate.dart';
 part 'types.dart';
 
-Future<MySqlConnection> mysqlCreateConnection() async {
-  final setting = ConnectionSettings(host: "localhost", port: 3306, user: "test", password: "test", db: "test", useSSL: false, timeout: Duration(seconds: 10));
-  return await MySqlConnection.connect(setting);
+Future<MySQLConnection> mysqlCreateConnection() async {
+  MySQLConnection c = await MySQLConnection.createConnection(host: "localhost", port: 3306, userName: "test", password: "test", databaseName: "test");
+  await c.connect();
+  return c;
+}
+
+MySQLConnectionPool mysqlCreatePool() {
+  return MySQLConnectionPool(host: "localhost", port: 3306, userName: "root", password: "root", maxConnections: 10);
 }
 
 class MySqlPoolExecutor extends SQLExecutorTx {
-  final MySqlConnectionPool pool;
+  final MySQLConnectionPool pool;
 
   MySqlPoolExecutor(this.pool, {required String database, super.migrator}) : super(defaultSchema: database);
 
@@ -26,34 +31,32 @@ class MySqlPoolExecutor extends SQLExecutorTx {
 
   @override
   FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) async {
-    List<Results> ls = await pool.queryMulti(sql, parametersList);
-    return ls.mapList((rs) => rs.queryResult());
+    final st = await pool.prepare(sql, false);
+    return await _StatementExecutor(st).multiQuery(parametersList);
   }
 
   @override
   FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
-    Results rs = await pool.query(sql, parameters);
-    return rs.queryResult();
+    final st = await pool.prepare(sql, false);
+    return await _StatementExecutor(st).rawQuery(parameters);
   }
 
   @override
   FutureOr<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]) async {
-    Results rs = await pool.query(sql, parameters);
-    ResultMeta meta = rs.meta;
-    return Stream<RowData>.fromIterable(rs.map((e) => RowData(e, meta: meta)));
+    final st = await pool.prepare(sql, true);
+    return await _StatementExecutor(st).streamQuery(parameters);
   }
 
   @override
   FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) async {
-    R? r = await pool.transaction((ctx) async {
-      return await callback(_MySqlContextExecutor(ctx, database: defaultSchema, migrator: migrator));
-    }, onError: (e) => throw (e));
-    return r as R;
+    return await pool.transactional((c) async {
+      return await callback(MySqlConnectionExecutor(c, database: this.defaultSchema, migrator: migrator));
+    });
   }
 }
 
 class MySqlConnectionExecutor extends SQLExecutorTx {
-  final MySqlConnection connection;
+  final MySQLConnection connection;
 
   MySqlConnectionExecutor(this.connection, {required String database, super.migrator}) : super(defaultSchema: database);
 
@@ -65,65 +68,79 @@ class MySqlConnectionExecutor extends SQLExecutorTx {
 
   @override
   FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) async {
-    List<Results> ls = await connection.queryMulti(sql, parametersList);
-    return ls.mapList((rs) => rs.queryResult());
+    final st = await connection.prepare(sql, false);
+    return await _StatementExecutor(st).multiQuery(parametersList);
   }
 
   @override
   FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
-    Results rs = await connection.query(sql, parameters);
-    return rs.queryResult();
+    final st = await connection.prepare(sql, false);
+    return await _StatementExecutor(st).rawQuery(parameters);
   }
 
   @override
   FutureOr<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]) async {
-    Results rs = await connection.query(sql, parameters);
-    ResultMeta meta = rs.meta;
-    return Stream<RowData>.fromIterable(rs.map((e) => RowData(e, meta: meta)));
+    final st = await connection.prepare(sql, true);
+    return await _StatementExecutor(st).streamQuery(parameters);
   }
 
   @override
   FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) async {
-    R? r = await connection.transaction((ctx) async {
-      return await callback(_MySqlContextExecutor(ctx, database: defaultSchema, migrator: migrator));
-    }, onError: (e) => throw (e));
-    return r as R;
+    return connection.transactional((c) async {
+      return await callback(this);
+    });
   }
 }
 
-class _MySqlContextExecutor extends SQLExecutor {
-  final TransactionContext txContext;
+class _StatementExecutor {
+  final PreparedStmt statment;
 
-  _MySqlContextExecutor(this.txContext, {required String database, super.migrator}) : super(defaultSchema: database);
+  _StatementExecutor(this.statment);
 
-  @override
-  FutureOr<int> lastInsertId() async {
-    final r = await rawQuery("SELECT LAST_INSERT_ID()");
-    return r.firstValue() ?? 0;
+  FutureOr<List<QueryResult>> multiQuery(Iterable<AnyList> parametersList) async {
+    List<QueryResult> all = [];
+    for (AnyList ls in parametersList) {
+      IResultSet rs = await statment.execute(ls);
+      all.add(rs.queryResult());
+    }
+    await statment.deallocate();
+    return all;
   }
 
-  @override
-  FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) async {
-    List<Results> ls = await txContext.queryMulti(sql, parametersList);
-    return ls.mapList((rs) => rs.queryResult());
+  FutureOr<QueryResult> rawQuery([AnyList? parameters]) async {
+    IResultSet rs = await statment.execute(parameters ?? const []);
+    final qr = rs.queryResult();
+    await statment.deallocate();
+    return qr;
   }
 
-  @override
-  FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
-    Results rs = await txContext.query(sql, parameters);
-    return rs.queryResult();
-  }
-
-  @override
-  FutureOr<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]) async {
-    Results rs = await txContext.query(sql, parameters);
+  FutureOr<Stream<RowData>> streamQuery([AnyList? parameters]) async {
+    IResultSet rs = await statment.execute(parameters ?? const []);
     ResultMeta meta = rs.meta;
-    return Stream<RowData>.fromIterable(rs.map((e) => RowData(e, meta: meta)));
+    Stream<RowData> s = rs.rowsStream.map((e) {
+      AnyList ls = List.filled(e.numOfColumns, null);
+      for (int i = 0; i < e.numOfColumns; ++i) {
+        ls[i] = e.colAt(i);
+      }
+      return RowData(ls, meta: meta);
+    });
+    s.whenComplete(() => statment.deallocate());
+    return s;
   }
 }
 
-extension on Results {
-  ResultMeta get meta => ResultMeta(this.fields.mapIndex((i, e) => ColumnMeta(label: e.name | "[$i]")));
+extension on IResultSet {
+  ResultMeta get meta => ResultMeta(this.cols.mapIndex((i, e) => ColumnMeta(label: e.name | "[$i]")));
 
-  QueryResult queryResult() => QueryResult(this.toList(), meta: meta, rawResult: this, affectedRows: this.affectedRows ?? 0);
+  QueryResult queryResult() {
+    List<List<dynamic>> all = [];
+    for (ResultSetRow row in this.rows) {
+      AnyList ls = List.filled(row.numOfColumns, null);
+      for (int i = 0; i < row.numOfColumns; ++i) {
+        ls[i] = row.colAt(i);
+      }
+      all.add(ls);
+    }
+    return QueryResult(all, meta: meta, rawResult: this, affectedRows: this.affectedRows.toInt());
+  }
 }

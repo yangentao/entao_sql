@@ -27,7 +27,7 @@ enum Person with TableColumn<Person> {
   List<Person> get columns => Person.values;
 }
 
-void main() {
+void main() async  {
   test("auto inc", () async {
     final ex = await _createExecutor();
     ex.rawQuery("DROP TABLE Person ");
