@@ -5,7 +5,6 @@ class JSONB extends ColumnProto {
     super.rename,
     super.primaryKey = false,
     super.notNull = false,
-    super.autoInc = 0,
     super.unique = false,
     super.index = false,
     super.check,
@@ -20,7 +19,6 @@ class JSON extends ColumnProto {
     super.rename,
     super.primaryKey = false,
     super.notNull = false,
-    super.autoInc = 0,
     super.unique = false,
     super.index = false,
     super.check,
@@ -35,7 +33,6 @@ class UUID extends ColumnProto {
     super.rename,
     super.primaryKey = false,
     super.notNull = false,
-    super.autoInc = 0,
     super.unique = false,
     super.index = false,
     super.check,
@@ -50,7 +47,6 @@ class BOOLEAN extends ColumnProto {
     super.rename,
     super.primaryKey = false,
     super.notNull = false,
-    super.autoInc = 0,
     super.unique = false,
     super.index = false,
     super.check,
@@ -66,7 +62,6 @@ class TIMESTAMP extends ColumnProto {
     super.rename,
     super.primaryKey = false,
     super.notNull = false,
-    super.autoInc = 0,
     super.unique = false,
     super.index = false,
     super.check,
@@ -82,7 +77,6 @@ class TIME extends ColumnProto {
     super.rename,
     super.primaryKey = false,
     super.notNull = false,
-    super.autoInc = 0,
     super.unique = false,
     super.index = false,
     super.check,
@@ -97,7 +91,6 @@ class DATE extends ColumnProto {
     super.rename,
     super.primaryKey = false,
     super.notNull = false,
-    super.autoInc = 0,
     super.unique = false,
     super.index = false,
     super.check,
@@ -112,7 +105,6 @@ class BLOB extends ColumnProto {
     super.rename,
     super.primaryKey = false,
     super.notNull = false,
-    super.autoInc = 0,
     super.unique = false,
     super.index = false,
     super.check,
@@ -128,7 +120,6 @@ class VARCHAR extends ColumnProto {
     super.rename,
     super.primaryKey = false,
     super.notNull = false,
-    super.autoInc = 0,
     super.unique = false,
     super.index = false,
     super.check,
@@ -144,7 +135,6 @@ class CHAR extends ColumnProto {
     super.rename,
     super.primaryKey = false,
     super.notNull = false,
-    super.autoInc = 0,
     super.unique = false,
     super.index = false,
     super.check,
@@ -159,7 +149,6 @@ class TEXT extends ColumnProto {
     super.rename,
     super.primaryKey = false,
     super.notNull = false,
-    super.autoInc = 0,
     super.unique = false,
     super.index = false,
     super.check,
@@ -167,6 +156,53 @@ class TEXT extends ColumnProto {
     super.defaultValue,
     super.extras,
   }) : super(type: "TEXT");
+}
+
+class FLOAT32 extends ColumnProto {
+  const FLOAT32({
+    super.rename,
+    super.type = "REAL",
+    super.primaryKey = false,
+    super.notNull = false,
+    super.unique = false,
+    super.index = false,
+    super.check,
+    super.uniqueName,
+    super.defaultValue,
+    super.extras,
+  });
+}
+
+class DOUBLE extends ColumnProto {
+  const DOUBLE({
+    super.rename,
+    super.type = "DOUBLE PRECISION",
+    super.primaryKey = false,
+    super.notNull = false,
+    super.unique = false,
+    super.index = false,
+    super.check,
+    super.uniqueName,
+    super.defaultValue,
+    super.extras,
+  });
+}
+
+class NUMERIC extends ColumnProto {
+  const NUMERIC({
+    required int p,
+    required int s,
+    super.rename,
+    super.primaryKey = false,
+    super.notNull = false,
+    super.autoInc = 0,
+    super.unique = false,
+    super.index = false,
+    super.check,
+    super.uniqueName,
+    super.defaultValue,
+    super.extras,
+  }) : super(type: "NUMERIC($p, $s)");
 }
 
 class INT64 extends ColumnProto {
@@ -197,53 +233,4 @@ class INT32 extends ColumnProto {
     super.defaultValue,
     super.extras,
   }) : super(type: autoInc > 0 ? "SERIAL" : "INTEGER");
-}
-
-class FLOAT32 extends ColumnProto {
-  const FLOAT32({
-    super.rename,
-    super.type = "REAL",
-    super.primaryKey = false,
-    super.notNull = false,
-    super.autoInc = 0,
-    super.unique = false,
-    super.index = false,
-    super.check,
-    super.uniqueName,
-    super.defaultValue,
-    super.extras,
-  });
-}
-
-class DOUBLE extends ColumnProto {
-  const DOUBLE({
-    super.rename,
-    super.type = "DOUBLE PRECISION",
-    super.primaryKey = false,
-    super.notNull = false,
-    super.autoInc = 0,
-    super.unique = false,
-    super.index = false,
-    super.check,
-    super.uniqueName,
-    super.defaultValue,
-    super.extras,
-  });
-}
-
-class NUMERIC extends ColumnProto {
-  const NUMERIC({
-    required int p,
-    required int s,
-    super.rename,
-    super.primaryKey = false,
-    super.notNull = false,
-    super.autoInc = 0,
-    super.unique = false,
-    super.index = false,
-    super.check,
-    super.uniqueName,
-    super.defaultValue,
-    super.extras,
-  }) : super(type: "NUMERIC($p, $s)");
 }
