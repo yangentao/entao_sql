@@ -14,37 +14,37 @@ typedef PGType<T extends Object> = pg.Type<T>;
 // final _endpoint = Endpoint(host: 'localhost', database: 'test', username: 'test', password: 'test');
 // final poolPG = Pool.withEndpoints([_endpoint], settings: PoolSettings(sslMode: SslMode.disable));
 
-class PgPoolExecutor<T> extends PgSessionExecutor implements SQLExecutorTx {
+class PostgresPoolExecutor<T> extends _SessionExecutor implements SQLExecutorTx {
   pg.Pool<T> pool;
 
-  PgPoolExecutor(this.pool, {PostgresOptions? options, super.migrator}) : super(pool, options: options);
+  PostgresPoolExecutor(this.pool, {PostgresOptions? options, super.migrator}) : super(pool, options: options);
 
   @override
   FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) {
     return pool.runTx((session) async {
-      return await callback(PgSessionExecutor(session, options: options));
+      return await callback(_SessionExecutor(session, options: options));
     }, settings: options?.transactionSettings);
   }
 }
 
-class PgConnectionExecutor extends PgSessionExecutor implements SQLExecutorTx {
+class PostgresExecutor extends _SessionExecutor implements SQLExecutorTx {
   pg.Connection connection;
 
-  PgConnectionExecutor(this.connection, {PostgresOptions? options, super.migrator}) : super(connection, options: options);
+  PostgresExecutor(this.connection, {PostgresOptions? options, super.migrator}) : super(connection, options: options);
 
   @override
   FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) {
     return connection.runTx((session) async {
-      return await callback(PgSessionExecutor(session, options: options));
+      return await callback(_SessionExecutor(session, options: options));
     }, settings: options?.transactionSettings);
   }
 }
 
-class PgSessionExecutor extends SQLExecutor {
+class _SessionExecutor extends SQLExecutor {
   final pg.Session session;
   final PostgresOptions? options;
 
-  PgSessionExecutor(this.session, {this.options, super.migrator}) : super(defaultSchema: "public");
+  _SessionExecutor(this.session, {this.options, super.migrator}) : super(defaultSchema: "public");
 
   @override
   FutureOr<int> lastInsertId() async {
@@ -103,13 +103,13 @@ class PostgresOptions {
   PostgresOptions({this.timeout, this.queryMode, this.transactionSettings});
 }
 
-extension ResultMetaPGExt on pg.Result {
+extension on pg.Result {
   ResultMeta get meta => this.schema.meta;
 
   QueryResult queryResult({int affectedRows = 0}) => QueryResult(this, meta: meta, rawResult: this, affectedRows: this.affectedRows);
 }
 
-extension ResultMetaResultSchemaExt on pg.ResultSchema {
+extension on pg.ResultSchema {
   ResultMeta get meta => ResultMeta(this.columns.mapIndex((i, e) => ColumnMeta(label: e.columnName ?? "[$i]", typeId: e.typeOid)));
 }
 

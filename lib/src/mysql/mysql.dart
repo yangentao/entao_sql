@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:entao_dutil/entao_dutil.dart';
 import 'package:mysql_client_plus/mysql_client_plus.dart';
@@ -8,20 +9,53 @@ import '../sql.dart';
 part 'migrate.dart';
 part 'types.dart';
 
-Future<MySQLConnection> mysqlCreateConnection() async {
-  MySQLConnection c = await MySQLConnection.createConnection(host: "localhost", port: 3306, userName: "test", password: "test", databaseName: "test");
-  await c.connect();
-  return c;
+class Endpoint {
+  // string or inet address.
+  final Object host;
+  final int port;
+  final String username;
+  final String password;
+
+  Endpoint({this.host = "localhost", this.port = 3306, required this.username, required this.password});
 }
 
-MySQLConnectionPool mysqlCreatePool() {
-  return MySQLConnectionPool(host: "localhost", port: 3306, userName: "root", password: "root", maxConnections: 10);
+class ConnectionSettings {
+  final bool? secure;
+  final String? collation;
+  final SecurityContext? securityContext;
+  final bool Function(X509Certificate)? onBadCertificate;
+
+  ConnectionSettings({this.secure, this.collation, this.securityContext, this.onBadCertificate});
 }
 
-class MySqlPoolExecutor extends SQLExecutorTx {
+class PoolSettings extends ConnectionSettings {
+  int? timeoutMs;
+  int? maxConnections;
+
+  PoolSettings({this.maxConnections, this.timeoutMs, super.secure, super.collation, super.securityContext, super.onBadCertificate});
+}
+
+class MySQLPoolExecutor extends SQLExecutorTx {
   final MySQLConnectionPool pool;
 
-  MySqlPoolExecutor(this.pool, {required String database, super.migrator}) : super(defaultSchema: database);
+  MySQLPoolExecutor(this.pool, {required String database, super.migrator}) : super(defaultSchema: database);
+
+  static MySQLPoolExecutor create({required Endpoint endpoint, required String database, PoolSettings? settings}) {
+    MySQLConnectionPool p = MySQLConnectionPool(
+        host: endpoint.host,
+        port: endpoint.port,
+        userName: endpoint.username,
+        password: endpoint.password,
+        databaseName: database,
+        maxConnections: settings?.maxConnections ?? 10,
+        timeoutMs: settings?.timeoutMs ?? 10000,
+        collation: settings?.collation ?? 'utf8mb4_general_ci',
+        secure: settings?.secure ?? true,
+        securityContext: settings?.securityContext,
+        onBadCertificate: settings?.onBadCertificate);
+
+    return MySQLPoolExecutor(p, database: "", migrator: MySQLMigrator(database));
+  }
 
   @override
   FutureOr<int> lastInsertId() async {
@@ -50,15 +84,30 @@ class MySqlPoolExecutor extends SQLExecutorTx {
   @override
   FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) async {
     return await pool.transactional((c) async {
-      return await callback(MySqlConnectionExecutor(c, database: this.defaultSchema, migrator: migrator));
+      return await callback(MySQLExecutor(c, database: this.defaultSchema, migrator: migrator));
     });
   }
 }
 
-class MySqlConnectionExecutor extends SQLExecutorTx {
+class MySQLExecutor extends SQLExecutorTx {
   final MySQLConnection connection;
 
-  MySqlConnectionExecutor(this.connection, {required String database, super.migrator}) : super(defaultSchema: database);
+  MySQLExecutor(this.connection, {required String database, super.migrator}) : super(defaultSchema: database);
+
+  static Future<MySQLExecutor> create({required Endpoint endpoint, required String database, ConnectionSettings? settings}) async {
+    MySQLConnection c = await MySQLConnection.createConnection(
+        host: endpoint.host,
+        port: endpoint.port,
+        userName: endpoint.username,
+        password: endpoint.password,
+        databaseName: database,
+        collation: settings?.collation ?? 'utf8mb4_general_ci',
+        secure: settings?.secure ?? true,
+        securityContext: settings?.securityContext,
+        onBadCertificate: settings?.onBadCertificate);
+    await c.connect();
+    return MySQLExecutor(c, database: database, migrator: MySQLMigrator(database));
+  }
 
   @override
   FutureOr<int> lastInsertId() async {

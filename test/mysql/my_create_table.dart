@@ -1,5 +1,5 @@
 import 'package:entao_sql/mysql.dart';
-import 'package:mysql_client_plus/mysql_client_plus.dart';
+import 'package:println/println.dart';
 
 enum Test with TableColumn<Test> {
   id(BIGINT(primaryKey: true, autoInc: 1000)),
@@ -17,20 +17,14 @@ enum Test with TableColumn<Test> {
   List<Test> get columns => Test.values;
 }
 
+final endpoint = Endpoint(username: "root", password: "Yet19491001");
+
 void main() async {
-  MySQLConnection c = await MySQLConnection.createConnection(host: "localhost", port: 3306, userName: "root", password: "Yet19491001", databaseName: "test");
-  await c.connect();
-  SQLExecutor e = MySqlConnectionExecutor(c, database: "test");
-  QueryResult r = await e.rawQuery("select * from test");
-  r.dump();
+  MySQLExecutor e = await MySQLExecutor.create(endpoint: endpoint, database: "test");
+  QueryResult r = await e.rawQuery("DROP TABLE IF EXISTS test");
   await e.register(Test.values, migrate: true);
-  // test("auto inc", () async {
-  //   final ex = await _createExecutor();
-  //   await  ex.rawQuery("DROP TABLE test ");
-  //   await ex.register(Test.values, migrate: true);
-  //   // RowData? row = await ex.insert(Test, values: [Test.name >> "entao", Test.nValue >> 33]);
-  //   // println(row);
-  //   // await ex.dump(Test);
-  //   // expect(row?.get("id"), 1000);
-  // });
+  RowData? row = await e.insert(Test, values: [Test.name >> "entao", Test.nValue >> 33]);
+  println(row);
+  await e.dump(Test);
+  // expect(row?.get("id"), 1000);
 }

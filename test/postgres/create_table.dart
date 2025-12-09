@@ -8,7 +8,7 @@ Future<SQLExecutor> _createExecutor() async {
   // final c = await Connection.open(endpoint, settings: ConnectionSettings(sslMode: SslMode.disable));
   // return PgConnectionExecutor(c, migrator: PgMigrator());
   final p = Pool.withEndpoints([endpoint], settings: PoolSettings(sslMode: SslMode.disable));
-  return PgPoolExecutor(p, migrator: PgMigrator());
+  return PostgresPoolExecutor(p, migrator: PgMigrator());
 }
 
 enum Person with TableColumn<Person> {
