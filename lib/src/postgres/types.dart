@@ -3,6 +3,18 @@ part of 'postgres.dart';
 /// RowData? row = await ex.insert(Person, values: [
 ///       Person.info >> JSONB_VALUE([1, 2, 3])
 /// ]);
+///
+pg.TypedValue<String> UUID_VALUE(String value) => pg.TypedValue(pg.Type.uuid, value);
+
+pg.TypedValue<DateTime> DATE_VALUE(DateTime value) => pg.TypedValue(pg.Type.date, value);
+
+pg.TypedValue<pg.Time> TIME_VALUE(pg.Time value) => pg.TypedValue(pg.Type.time, value);
+
+pg.TypedValue<DateTime> TIMESTAMP_VALUE(DateTime value) => pg.TypedValue(pg.Type.timestamp, value);
+
+pg.TypedValue<DateTime> TIMESTAMPZ_VALUE(DateTime value) => pg.TypedValue(pg.Type.timestampTz, value);
+
+pg.TypedValue<List<int>> BLOB_VALUE(List<int> value) => pg.TypedValue(pg.Type.byteArray, value);
 
 /// value will been json.encode(value), before send to database
 pg.TypedValue JSON_VALUE(dynamic value) => pg.TypedValue(pg.Type.json, value);
@@ -126,7 +138,7 @@ class TIMESTAMPZ extends ColumnProto {
     super.uniqueName,
     super.defaultValue,
     super.extras,
-  }) : super(type: "TIMESTAMPZ");
+  }) : super(type: "TIMESTAMPTZ");
 }
 
 class TIME extends ColumnProto {
@@ -154,7 +166,7 @@ class TIMEZ extends ColumnProto {
     super.uniqueName,
     super.defaultValue,
     super.extras,
-  }) : super(type: "TIMEZ");
+  }) : super(type: "TIMETZ");
 }
 
 class DATE extends ColumnProto {
