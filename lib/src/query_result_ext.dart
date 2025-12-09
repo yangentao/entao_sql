@@ -5,51 +5,52 @@ extension QueryResultExt on QueryResult {
   int get columnCount => meta.columns.length;
 
   // value
-  int? firstInt({int col = 0}) => this.firstValueAt(col: col) as int?;
-
-  String? firstString({int col = 0}) => this.firstValueAt(col: col) as String?;
-
-  dynamic firstValueAt({int col = 0}) => this.firstOrNull?[col];
-
-  dynamic firstValueNamed({required String name}) => this.firstOrNull?[labelIndex(name)];
-
-  List<T> allValuesAt<T>({int col = 0}) => this.mapList((e) => e[col] as T);
-
-  List<T> allValuesNamed<T>({required String name}) {
-    int col = labelIndex(name);
-    return this.mapList((e) => e[col] as T);
+  /// key is  int index , OR String key
+  T? firstValue<T>([Object col = 0]) {
+    if (col case int n) return this.firstOrNull?[n] as T?;
+    return this.firstOrNull?[labelIndex(col.toString())] as T?;
   }
 
-  dynamic valueAt({required int row, required int col}) => this[row][col];
+  T? oneValue<T>({required int row, Object col = 0}) {
+    if (col case int n) return this[row][n] as T?;
+    return this[row][labelIndex(col.toString())] as T?;
+  }
 
-  dynamic valueNamed({required int row, required String col}) => this[row][labelIndex(col)];
+  /// col is  int index , OR String key
+  List<T> listValues<T>([Object col = 0]) {
+    if (col case int n) {
+      return this.mapList((e) => e[n] as T);
+    }
+    int n = labelIndex(col.toString());
+    return this.mapList((e) => e[n] as T);
+  }
 
   // map
-  AnyMap? firstMap() => this.isEmpty ? null : mapAt(0);
+  AnyMap? firstMap() => this.isEmpty ? null : oneMap(0);
 
-  AnyMap mapAt(int row) => AnyMap.fromEntries(this[row].mapIndex((i, e) => MapEntry(meta.columns[i].label, e)));
+  AnyMap oneMap(int row) => AnyMap.fromEntries(this[row].mapIndex((i, e) => MapEntry(meta.columns[i].label, e)));
 
-  List<AnyMap> allMaps() => this.mapIndex((i, _) => mapAt(i));
+  List<AnyMap> listMaps() => this.mapIndex((i, _) => oneMap(i));
 
   // model
   T? firstModel<T>(ModelCreator<T> creator) => firstMap()?.let(creator);
 
-  T modelAt<T>(ModelCreator<T> creator, {required int row}) => creator(this.mapAt(row));
+  T oneModel<T>(ModelCreator<T> creator, {required int row}) => creator(this.oneMap(row));
 
-  List<T> allModels<T>(ModelCreator<T> creator) => allMaps().mapList(creator);
+  List<T> listModels<T>(ModelCreator<T> creator) => listMaps().mapList(creator);
 
   // row
-  RowData? firstRow() => this.isEmpty ? null : rowAt(0);
+  RowData? firstRow() => this.isEmpty ? null : oneRow(0);
 
-  RowData rowAt(int row) => RowData(this[row], meta: meta);
+  RowData oneRow(int row) => RowData(this[row], meta: meta);
 
-  List<RowData> allRows() => this.mapList((e) => RowData(e, meta: meta));
+  List<RowData> listRows() => this.mapList((e) => RowData(e, meta: meta));
 
   void dump() {
     if (this.isEmpty) {
       logSQL.d("[empty]");
     } else {
-      for (AnyMap row in this.allMaps()) {
+      for (AnyMap row in this.listMaps()) {
         logSQL.d(row);
       }
     }

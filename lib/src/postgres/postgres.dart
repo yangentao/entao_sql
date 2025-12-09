@@ -49,7 +49,7 @@ class PgSessionExecutor extends SQLExecutor {
   @override
   FutureOr<int> lastInsertId() async {
     final r = await rawQuery("SELECT lastval()");
-    return r.firstInt() ?? 0;
+    return r.firstValue() ?? 0;
   }
 
   @override

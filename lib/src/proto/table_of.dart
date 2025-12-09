@@ -13,12 +13,12 @@ class TableOf<M extends TableModel<E>, E extends TableColumn> {
 
   Future<V?> oneValue<V>({required Object column, Where? where, Object? groupBy, Object? having, Object? window, Object? orderBy}) async {
     final r = await this.query(columns: [column], where: where, groupBy: groupBy, having: having, window: window, orderBy: orderBy, limit: 1);
-    return r.firstValueAt();
+    return r.firstValue();
   }
 
   Future<List<V>> listColumn<V>({required Object column, Where? where, Object? groupBy, Object? having, Object? window, Object? orderBy, int? limit, int? offset}) async {
     final r = await query(columns: [column], where: where, groupBy: groupBy, having: having, window: window, orderBy: orderBy, limit: limit, offset: offset);
-    return r.allValuesAt();
+    return r.listValues();
   }
 
   /// xx(key: 1, ...)
@@ -35,7 +35,7 @@ class TableOf<M extends TableModel<E>, E extends TableColumn> {
 
   Future<List<M>> listModel({Where? where, Object? groupBy, Object? having, Object? window, Object? orderBy, int? limit, int? offset}) async {
     final r = await this.query(where: where, groupBy: groupBy, having: having, window: window, orderBy: orderBy, limit: limit, offset: offset);
-    return r.allModels(creator);
+    return r.listModels(creator);
   }
 
   Future<QueryResult> query({List<Object>? columns, Where? where, Object? groupBy, Object? having, Object? window, Object? orderBy, int? limit, int? offset}) async {

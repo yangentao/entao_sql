@@ -13,7 +13,7 @@ Future<SQLExecutor> _createExecutor() async {
 
 enum Person with TableColumn<Person> {
   id(LONG(primaryKey: true, autoInc: 1000)),
-  info(JSONB());
+  info(ARRAY<int>());
 
   const Person(this.proto);
 
@@ -25,18 +25,19 @@ enum Person with TableColumn<Person> {
 }
 
 void main() {
-  test("json", () async {
+  test("array", () async {
     final ex = await _createExecutor();
     ex.rawQuery("DROP TABLE Person ");
     await ex.register(Person.values, migrate: true);
     RowData? row = await ex.insert(Person, values: [
-      Person.info >> JSONB_VALUE([1, 2, 3])
+      Person.info >> ARRAY_VALUE([1, 2, 3])
     ]);
     println(row);
     await ex.dump(Person);
     expect(row?.get("id"), 1000);
     println(row!.get("info").runtimeType);
     QueryResult r = await ex.query([], from: Person, where: Person.id.EQ(1000));
-    expect(r.firstValue("info"), equals([1, 2, 3]));
+    expect(r.firstValue( "info"), equals([1, 2, 3]));
+    r.dump();
   });
 }

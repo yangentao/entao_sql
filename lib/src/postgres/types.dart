@@ -4,12 +4,46 @@ part of 'postgres.dart';
 ///       Person.info >> JSONB_VALUE([1, 2, 3])
 /// ]);
 
-
 /// value will been json.encode(value), before send to database
 pg.TypedValue JSON_VALUE(dynamic value) => pg.TypedValue(pg.Type.json, value);
 
 /// value will been json.encode(value), before send to database
 pg.TypedValue JSONB_VALUE(dynamic value) => pg.TypedValue(pg.Type.jsonb, value);
+
+pg.TypedValue ARRAY_TEXT(List<String> value) {
+  return pg.TypedValue(pg.Type.textArray, value);
+}
+
+pg.TypedValue ARRAY_INT(List<int> value) {
+  return pg.TypedValue(pg.Type.bigIntegerArray, value);
+}
+
+pg.TypedValue ARRAY_DOUBLE(List<double> value) {
+  return pg.TypedValue(pg.Type.doubleArray, value);
+}
+
+pg.TypedValue ARRAY_BOOL(List<bool> value) {
+  return pg.TypedValue(pg.Type.booleanArray, value);
+}
+
+pg.TypedValue ARRAY_VALUE<T>(List<T> value) {
+  switch (T) {
+    // ignore: type_literal_in_constant_pattern
+    case int:
+      return pg.TypedValue(pg.Type.bigIntegerArray, value);
+    // ignore: type_literal_in_constant_pattern
+    case double:
+      return pg.TypedValue(pg.Type.doubleArray, value);
+    // ignore: type_literal_in_constant_pattern
+    case bool:
+      return pg.TypedValue(pg.Type.booleanArray, value);
+    // ignore: type_literal_in_constant_pattern
+    case String:
+      return pg.TypedValue(pg.Type.textArray, value);
+    default:
+      errorSQL("Unknown type of value: $value");
+  }
+}
 
 class JSONB extends ColumnProto {
   const JSONB({

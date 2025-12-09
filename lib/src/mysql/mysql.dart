@@ -21,7 +21,7 @@ class MySqlPoolExecutor extends SQLExecutorTx {
   @override
   FutureOr<int> lastInsertId() async {
     final r = await rawQuery("SELECT LAST_INSERT_ID()");
-    return r.firstInt() ?? 0;
+    return r.firstValue() ?? 0;
   }
 
   @override
@@ -60,7 +60,7 @@ class MySqlConnectionExecutor extends SQLExecutorTx {
   @override
   FutureOr<int> lastInsertId() async {
     final r = await rawQuery("SELECT LAST_INSERT_ID()");
-    return r.firstInt() ?? 0;
+    return r.firstValue() ?? 0;
   }
 
   @override
@@ -99,7 +99,7 @@ class _MySqlContextExecutor extends SQLExecutor {
   @override
   FutureOr<int> lastInsertId() async {
     final r = await rawQuery("SELECT LAST_INSERT_ID()");
-    return r.firstInt() ?? 0;
+    return r.firstValue() ?? 0;
   }
 
   @override
