@@ -1,0 +1,4 @@
+
+重载 TableColumn.operator >> value
+对Json, Array, 返回TypedValue(pg.Type.json, '[1,23]')
+

@@ -1,5 +1,16 @@
 part of 'postgres.dart';
 
+/// RowData? row = await ex.insert(Person, values: [
+///       Person.info >> JSONB_VALUE([1, 2, 3])
+/// ]);
+
+
+/// value will been json.encode(value), before send to database
+pg.TypedValue JSON_VALUE(dynamic value) => pg.TypedValue(pg.Type.json, value);
+
+/// value will been json.encode(value), before send to database
+pg.TypedValue JSONB_VALUE(dynamic value) => pg.TypedValue(pg.Type.jsonb, value);
+
 class JSONB extends ColumnProto {
   const JSONB({
     super.name,

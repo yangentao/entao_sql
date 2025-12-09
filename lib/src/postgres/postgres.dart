@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:entao_dutil/entao_dutil.dart';
-import 'package:postgres/postgres.dart' hide Type;
+import 'package:postgres/postgres.dart' as pg;
 import 'package:println/println.dart';
 
 import '../sql.dart';
@@ -9,11 +9,13 @@ import '../sql.dart';
 part 'migrate.dart';
 part 'types.dart';
 
+typedef PGType<T extends Object> = pg.Type<T>;
+
 // final _endpoint = Endpoint(host: 'localhost', database: 'test', username: 'test', password: 'test');
 // final poolPG = Pool.withEndpoints([_endpoint], settings: PoolSettings(sslMode: SslMode.disable));
 
 class PgPoolExecutor<T> extends PgSessionExecutor implements SQLExecutorTx {
-  Pool<T> pool;
+  pg.Pool<T> pool;
 
   PgPoolExecutor(this.pool, {PostgresOptions? options, super.migrator}) : super(pool, options: options);
 
@@ -26,7 +28,7 @@ class PgPoolExecutor<T> extends PgSessionExecutor implements SQLExecutorTx {
 }
 
 class PgConnectionExecutor extends PgSessionExecutor implements SQLExecutorTx {
-  Connection connection;
+  pg.Connection connection;
 
   PgConnectionExecutor(this.connection, {PostgresOptions? options, super.migrator}) : super(connection, options: options);
 
@@ -39,7 +41,7 @@ class PgConnectionExecutor extends PgSessionExecutor implements SQLExecutorTx {
 }
 
 class PgSessionExecutor extends SQLExecutor {
-  final Session session;
+  final pg.Session session;
   final PostgresOptions? options;
 
   PgSessionExecutor(this.session, {this.options, super.migrator}) : super(defaultSchema: "public");
@@ -56,7 +58,7 @@ class PgSessionExecutor extends SQLExecutor {
     if (parameters?.isNotEmpty == true) {
       logSQL.d(">>>>", parameters);
     }
-    Statement st = await session.prepare(sql.paramPositioned);
+    pg.Statement st = await session.prepare(sql.paramPositioned);
     Stream<RowData> s = st.bind(parameters).map((r) => RowData(r, meta: r.schema.meta));
     return s.whenComplete(() => st.dispose());
   }
@@ -67,7 +69,7 @@ class PgSessionExecutor extends SQLExecutor {
     if (parameters?.isNotEmpty == true) {
       logSQL.d(">>>>", parameters);
     }
-    Result r = await session.execute(sql.paramPositioned, parameters: parameters, timeout: options?.timeout, queryMode: options?.queryMode);
+    pg.Result r = await session.execute(sql.paramPositioned, parameters: parameters, timeout: options?.timeout, queryMode: options?.queryMode);
     return r.queryResult(affectedRows: r.affectedRows);
   }
 
@@ -78,9 +80,9 @@ class PgSessionExecutor extends SQLExecutor {
       logSQL.d(">>>>", parametersList);
     }
     List<QueryResult> ls = [];
-    Statement st = await session.prepare(sql.paramPositioned);
+    pg.Statement st = await session.prepare(sql.paramPositioned);
     for (final params in parametersList) {
-      Result r = await st.run(params, timeout: options?.timeout);
+      pg.Result r = await st.run(params, timeout: options?.timeout);
       ls << r.queryResult(affectedRows: r.affectedRows);
     }
     st.dispose();
@@ -95,19 +97,19 @@ class PgSessionExecutor extends SQLExecutor {
 
 class PostgresOptions {
   final Duration? timeout;
-  final QueryMode? queryMode;
-  final TransactionSettings? transactionSettings;
+  final pg.QueryMode? queryMode;
+  final pg.TransactionSettings? transactionSettings;
 
   PostgresOptions({this.timeout, this.queryMode, this.transactionSettings});
 }
 
-extension ResultMetaPGExt on Result {
+extension ResultMetaPGExt on pg.Result {
   ResultMeta get meta => this.schema.meta;
 
   QueryResult queryResult({int affectedRows = 0}) => QueryResult(this, meta: meta, rawResult: this, affectedRows: this.affectedRows);
 }
 
-extension ResultMetaResultSchemaExt on ResultSchema {
+extension ResultMetaResultSchemaExt on pg.ResultSchema {
   ResultMeta get meta => ResultMeta(this.columns.mapIndex((i, e) => ColumnMeta(label: e.columnName ?? "[$i]", typeId: e.typeOid)));
 }
 
