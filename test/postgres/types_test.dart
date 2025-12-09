@@ -7,7 +7,7 @@ void main() {
     expect(ARRAY<bool>().type, "BOOL[]");
     expect(ARRAY<BOOLEAN>().type, "BOOL[]");
     expect(ARRAY<int>().type, "BIGINT[]");
-    expect(ARRAY<LONG>().type, "BIGINT[]");
+    expect(ARRAY<BIGINT>().type, "BIGINT[]");
     expect(ARRAY<double>().type, "FLOAT[]");
     expect(ARRAY<DOUBLE>().type, "FLOAT[]");
     expect(ARRAY<String>().type, "TEXT[]");

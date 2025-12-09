@@ -115,6 +115,7 @@ class BOOLEAN extends ColumnProto {
 
 class TIMESTAMP extends ColumnProto {
   const TIMESTAMP({
+    int? precision,
     super.name,
     super.primaryKey = false,
     super.notNull = false,
@@ -124,11 +125,12 @@ class TIMESTAMP extends ColumnProto {
     super.uniqueName,
     super.defaultValue,
     super.extras,
-  }) : super(type: "TIMESTAMP");
+  }) : super(type: precision == null ? "TIMESTAMP" : "TIMESTAMP($precision)");
 }
 
 class TIMESTAMPTZ extends ColumnProto {
   const TIMESTAMPTZ({
+    int? precision,
     super.name,
     super.primaryKey = false,
     super.notNull = false,
@@ -138,11 +140,12 @@ class TIMESTAMPTZ extends ColumnProto {
     super.uniqueName,
     super.defaultValue,
     super.extras,
-  }) : super(type: "TIMESTAMPTZ");
+  }) : super(type: precision == null ? "TIMESTAMPTZ" : "TIMESTAMPTZ($precision)");
 }
 
 class TIME extends ColumnProto {
   const TIME({
+    int? precision,
     super.name,
     super.primaryKey = false,
     super.notNull = false,
@@ -152,11 +155,12 @@ class TIME extends ColumnProto {
     super.uniqueName,
     super.defaultValue,
     super.extras,
-  }) : super(type: "TIME");
+  }) : super(type: precision == null ? "TIME" : "TIME($precision)");
 }
 
 class TIMETZ extends ColumnProto {
   const TIMETZ({
+    int? precision,
     super.name,
     super.primaryKey = false,
     super.notNull = false,
@@ -166,7 +170,7 @@ class TIMETZ extends ColumnProto {
     super.uniqueName,
     super.defaultValue,
     super.extras,
-  }) : super(type: "TIMETZ");
+  }) : super(type: precision == null ? "TIMETZ" : "TIMETZ($precision)");
 }
 
 class DATE extends ColumnProto {
@@ -288,8 +292,8 @@ class NUMERIC extends ColumnProto {
   }) : super(type: "NUMERIC($p, $s)");
 }
 
-class LONG extends ColumnProto {
-  const LONG({
+class BIGINT extends ColumnProto {
+  const BIGINT({
     super.name,
     super.primaryKey = false,
     super.notNull = false,
@@ -332,7 +336,7 @@ class ARRAY<T extends Object> extends ColumnProto {
   }) : super(
             type: T == Object
                 ? "ARRAY"
-                : (T == int || T == LONG)
+                : (T == int || T == BIGINT)
                     ? "BIGINT[]"
                     : (T == double || T == DOUBLE)
                         ? "FLOAT[]"

@@ -12,7 +12,7 @@ Future<SQLExecutor> _createExecutor() async {
 }
 
 enum Person with TableColumn<Person> {
-  id(LONG(primaryKey: true, autoInc: 1000)),
+  id(BIGINT(primaryKey: true, autoInc: 1000)),
   info(TIMESTAMP());
 
   const Person(this.proto);

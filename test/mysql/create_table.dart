@@ -1,14 +1,12 @@
-import 'package:entao_sql/postgres.dart';
-import 'package:postgres/postgres.dart';
+import 'package:entao_sql/mysql.dart';
+import 'package:mysql1_ext/mysql1_ext.dart';
 import 'package:println/println.dart';
 import 'package:test/test.dart';
 
 Future<SQLExecutor> _createExecutor() async {
-  final endpoint = Endpoint(host: 'localhost', database: 'test', username: 'test', password: 'test');
-  // final c = await Connection.open(endpoint, settings: ConnectionSettings(sslMode: SslMode.disable));
-  // return PgConnectionExecutor(c, migrator: PgMigrator());
-  final p = Pool.withEndpoints([endpoint], settings: PoolSettings(sslMode: SslMode.disable));
-  return PgPoolExecutor(p, migrator: PgMigrator());
+  final setting = ConnectionSettings(host: "localhost", port: 3306, user: "test", password: "test", db: "test", useSSL: false, timeout: Duration(seconds: 10));
+  final c = await MySqlConnection.connect(setting);
+  return MySqlConnectionExecutor(c, database: "test", migrator: MySQLMigrator("test"));
 }
 
 enum Person with TableColumn<Person> {
