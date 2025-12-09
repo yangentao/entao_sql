@@ -39,5 +39,15 @@ class RowData extends UnmodifiableListView<Object?> {
 
   Object? named(String label) => this[labelIndex(label)];
 
+  Object? get(Object key) {
+    if (key case int n) return getOr(n);
+    return named(key.toString());
+  }
+
   AnyMap toMap() => AnyMap.fromEntries(this.mapIndex((i, e) => MapEntry(meta.columns[i].label, e)));
+
+  @override
+  String toString() {
+    return toMap().toString();
+  }
 }

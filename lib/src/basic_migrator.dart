@@ -75,14 +75,10 @@ abstract class UtilMigrator {
   Future<QueryResult> execute(String sql, [AnyList? parameters]);
 
   Future<void> migrate() async {
-    println("table exist?");
     if (!await tableExists()) {
-      println("table exist? NO");
       await createTable();
       return;
     }
-    println("table exist? YES");
-
     Set<String> colSet = await tableFields();
     for (TableColumn f in fields) {
       if (!colSet.contains(f.columnName)) {

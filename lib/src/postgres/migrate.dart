@@ -21,7 +21,6 @@ class _MigratorLite extends UtilMigratorPostgres {
 
   @override
   Future<bool> tableExists() async {
-    println("tableExists()");
     QueryResult r = await execute(r"SELECT 1 FROM pg_tables WHERE schemaname=$1 AND tablename=$2", [schema ?? "public", tableName]);
     return r.isNotEmpty;
   }

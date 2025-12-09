@@ -1,0 +1,41 @@
+import 'package:entao_sql/postgres.dart';
+import 'package:postgres/postgres.dart';
+import 'package:println/println.dart';
+import 'package:test/test.dart';
+
+Future<SQLExecutor> _createExecutor() async {
+  final endpoint = Endpoint(host: 'localhost', database: 'test', username: 'test', password: 'test');
+  // final c = await Connection.open(endpoint, settings: ConnectionSettings(sslMode: SslMode.disable));
+  // return PgConnectionExecutor(c, migrator: PgMigrator());
+  final p = Pool.withEndpoints([endpoint], settings: PoolSettings(sslMode: SslMode.disable));
+  return PgPoolExecutor(p, migrator: PgMigrator());
+}
+
+enum Person with TableColumn<Person> {
+  id(LONG(primaryKey: true, autoInc: 1000)),
+  name(VARCHAR(length: 128)),
+  nValue(LONG()),
+  fValue(DOUBLE()),
+  sValue(TEXT());
+
+  const Person(this.proto);
+
+  @override
+  final ColumnProto proto;
+
+  @override
+  List<Person> get columns => Person.values;
+}
+
+void main() {
+  test("auto inc", () async {
+    final ex = await _createExecutor();
+    ex.rawQuery("DROP TABLE Person ");
+    await ex.register(Person.values, migrate: true);
+    RowData? row = await ex.insert(Person, values: [Person.name >> "entao", Person.nValue >> 33]);
+    println(row);
+    await ex.dump(Person);
+
+    expect(row?.get("id"), 1000);
+  });
+}
