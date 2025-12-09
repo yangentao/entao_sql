@@ -234,3 +234,17 @@ class INT32 extends ColumnProto {
     super.extras,
   }) : super(type: autoInc > 0 ? "SERIAL" : "INTEGER");
 }
+
+class ARRAY<T extends Object> extends ColumnProto {
+  const ARRAY({
+    super.name,
+    super.primaryKey = false,
+    super.notNull = false,
+    super.unique = false,
+    super.index = false,
+    super.check,
+    super.uniqueName,
+    super.defaultValue,
+    super.extras,
+  }) : super(type: T == Object ? "ARRAY" : "$T[]");
+}
