@@ -16,6 +16,6 @@ void main() {
     expect(ARRAY<FLOAT32>().type, "REAL[]");
     expect(ARRAY<BLOB>().type, "BYTEA[]");
     expect(ARRAY<TIME>().type, "TIME[]");
-    expect(ARRAY<TIMEZ>().type, "TIMEZ[]");
+    expect(ARRAY<TIMETZ>().type, "TIMEZ[]");
   });
 }

@@ -127,8 +127,8 @@ class TIMESTAMP extends ColumnProto {
   }) : super(type: "TIMESTAMP");
 }
 
-class TIMESTAMPZ extends ColumnProto {
-  const TIMESTAMPZ({
+class TIMESTAMPTZ extends ColumnProto {
+  const TIMESTAMPTZ({
     super.name,
     super.primaryKey = false,
     super.notNull = false,
@@ -155,8 +155,8 @@ class TIME extends ColumnProto {
   }) : super(type: "TIME");
 }
 
-class TIMEZ extends ColumnProto {
-  const TIMEZ({
+class TIMETZ extends ColumnProto {
+  const TIMETZ({
     super.name,
     super.primaryKey = false,
     super.notNull = false,
