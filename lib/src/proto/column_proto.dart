@@ -1,7 +1,7 @@
 part of '../sql.dart';
 
 class ColumnProto {
-  final String? rename;
+  final String? name;
   final String type;
   final bool primaryKey;
   final int autoInc; //AUTOINCREMENT
@@ -14,7 +14,7 @@ class ColumnProto {
   final String? extras;
 
   const ColumnProto({
-    this.rename,
+    this.name,
     required this.type,
     this.primaryKey = false,
     this.notNull = false,

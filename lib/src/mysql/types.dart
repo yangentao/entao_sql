@@ -2,7 +2,7 @@ part of 'mysql.dart';
 
 class INTEGER extends ColumnProto {
   const INTEGER({
-    super.rename,
+    super.name,
     super.type = "INTEGER",
     super.primaryKey = false,
     super.notNull = false,

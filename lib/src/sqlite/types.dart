@@ -6,7 +6,7 @@ part of 'sqlite.dart';
 
 class INT64 extends ColumnProto {
   const INT64({
-    super.rename,
+    super.name,
     super.type = "INTEGER",
     super.primaryKey = false,
     super.notNull = false,
@@ -22,7 +22,7 @@ class INT64 extends ColumnProto {
 
 class REAL64 extends ColumnProto {
   const REAL64({
-    super.rename,
+    super.name,
     super.type = "REAL",
     super.primaryKey = false,
     super.notNull = false,
@@ -37,7 +37,7 @@ class REAL64 extends ColumnProto {
 
 class NUMERIC extends ColumnProto {
   const NUMERIC({
-    super.rename,
+    super.name,
     super.type = "NUMERIC",
     super.primaryKey = false,
     super.notNull = false,
@@ -52,7 +52,7 @@ class NUMERIC extends ColumnProto {
 
 class TEXT extends ColumnProto {
   const TEXT({
-    super.rename,
+    super.name,
     super.type = "TEXT",
     super.primaryKey = false,
     super.notNull = false,
@@ -67,7 +67,7 @@ class TEXT extends ColumnProto {
 
 class BLOB extends ColumnProto {
   const BLOB({
-    super.rename,
+    super.name,
     super.type = "BLOB",
     super.primaryKey = false,
     super.notNull = false,

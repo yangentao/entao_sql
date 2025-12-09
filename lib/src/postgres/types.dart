@@ -2,7 +2,7 @@ part of 'postgres.dart';
 
 class JSONB extends ColumnProto {
   const JSONB({
-    super.rename,
+    super.name,
     super.primaryKey = false,
     super.notNull = false,
     super.unique = false,
@@ -16,7 +16,7 @@ class JSONB extends ColumnProto {
 
 class JSON extends ColumnProto {
   const JSON({
-    super.rename,
+    super.name,
     super.primaryKey = false,
     super.notNull = false,
     super.unique = false,
@@ -30,7 +30,7 @@ class JSON extends ColumnProto {
 
 class UUID extends ColumnProto {
   const UUID({
-    super.rename,
+    super.name,
     super.primaryKey = false,
     super.notNull = false,
     super.unique = false,
@@ -44,7 +44,7 @@ class UUID extends ColumnProto {
 
 class BOOLEAN extends ColumnProto {
   const BOOLEAN({
-    super.rename,
+    super.name,
     super.primaryKey = false,
     super.notNull = false,
     super.unique = false,
@@ -59,7 +59,7 @@ class BOOLEAN extends ColumnProto {
 class TIMESTAMP extends ColumnProto {
   const TIMESTAMP({
     bool zone = false,
-    super.rename,
+    super.name,
     super.primaryKey = false,
     super.notNull = false,
     super.unique = false,
@@ -74,7 +74,7 @@ class TIMESTAMP extends ColumnProto {
 class TIME extends ColumnProto {
   const TIME({
     bool zone = false,
-    super.rename,
+    super.name,
     super.primaryKey = false,
     super.notNull = false,
     super.unique = false,
@@ -88,7 +88,7 @@ class TIME extends ColumnProto {
 
 class DATE extends ColumnProto {
   const DATE({
-    super.rename,
+    super.name,
     super.primaryKey = false,
     super.notNull = false,
     super.unique = false,
@@ -102,7 +102,7 @@ class DATE extends ColumnProto {
 
 class BLOB extends ColumnProto {
   const BLOB({
-    super.rename,
+    super.name,
     super.primaryKey = false,
     super.notNull = false,
     super.unique = false,
@@ -117,7 +117,7 @@ class BLOB extends ColumnProto {
 class VARCHAR extends ColumnProto {
   const VARCHAR({
     required int length,
-    super.rename,
+    super.name,
     super.primaryKey = false,
     super.notNull = false,
     super.unique = false,
@@ -132,7 +132,7 @@ class VARCHAR extends ColumnProto {
 class CHAR extends ColumnProto {
   const CHAR({
     required int length,
-    super.rename,
+    super.name,
     super.primaryKey = false,
     super.notNull = false,
     super.unique = false,
@@ -146,7 +146,7 @@ class CHAR extends ColumnProto {
 
 class TEXT extends ColumnProto {
   const TEXT({
-    super.rename,
+    super.name,
     super.primaryKey = false,
     super.notNull = false,
     super.unique = false,
@@ -160,7 +160,7 @@ class TEXT extends ColumnProto {
 
 class FLOAT32 extends ColumnProto {
   const FLOAT32({
-    super.rename,
+    super.name,
     super.type = "REAL",
     super.primaryKey = false,
     super.notNull = false,
@@ -175,7 +175,7 @@ class FLOAT32 extends ColumnProto {
 
 class DOUBLE extends ColumnProto {
   const DOUBLE({
-    super.rename,
+    super.name,
     super.type = "DOUBLE PRECISION",
     super.primaryKey = false,
     super.notNull = false,
@@ -192,7 +192,7 @@ class NUMERIC extends ColumnProto {
   const NUMERIC({
     required int p,
     required int s,
-    super.rename,
+    super.name,
     super.primaryKey = false,
     super.notNull = false,
     super.autoInc = 0,
@@ -207,7 +207,7 @@ class NUMERIC extends ColumnProto {
 
 class INT64 extends ColumnProto {
   const INT64({
-    super.rename,
+    super.name,
     super.primaryKey = false,
     super.notNull = false,
     super.autoInc = 0,
@@ -222,7 +222,7 @@ class INT64 extends ColumnProto {
 
 class INT32 extends ColumnProto {
   const INT32({
-    super.rename,
+    super.name,
     super.primaryKey = false,
     super.notNull = false,
     super.autoInc = 0,

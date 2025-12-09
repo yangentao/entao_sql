@@ -14,7 +14,7 @@ mixin TableColumn<T extends Enum> on Enum {
 
   ColumnProto get proto;
 
-  String get columnName => exGetOrPut("nameColumn", () => (proto.rename ?? this.name));
+  String get columnName => exGetOrPut("nameColumn", () => (proto.name ?? this.name));
 
   String get nameSQL => exGetOrPut("nameSQL", () => columnName.escapeSQL);
 
