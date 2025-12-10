@@ -9,7 +9,7 @@ import '../sql.dart';
 
 part 'types.dart';
 
-class MySQLPoolExecutor implements PoolExecutor {
+class MySQLPoolExecutor implements TranscationalExecutor {
   final MySQLConnectionPool pool;
 
   MySQLPoolExecutor(this.pool);
@@ -64,7 +64,7 @@ class MySQLPoolExecutor implements PoolExecutor {
   }
 }
 
-class MySQLExecutor implements ConnectionExecutor, SessionExecutor {
+class MySQLExecutor implements TranscationalExecutor, SessionExecutor {
   final MySQLConnection connection;
 
   MySQLExecutor(this.connection);

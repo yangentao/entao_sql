@@ -1,6 +1,6 @@
 part of 'sqlite.dart';
 
-class SQliteExecutor implements ConnectionExecutor, SessionExecutor {
+class SQliteExecutor implements TranscationalExecutor, SessionExecutor {
   LiteSQL lite;
 
   SQliteExecutor(this.lite);

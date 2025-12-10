@@ -2,15 +2,11 @@ part of '../sql.dart';
 
 /// don't use 'name', use 'columnName',  enum's name maybe renamed.
 mixin TableColumn<T extends Enum> on Enum {
-  Type get tableType => T;
-
   String get tableName => exGetOrPut("tableName", () {
         String a = "$T";
         if (a == "Object") errorSQL("TableColumn MUST has a generic type parameter. forexample:  enum Person with TableColumn<Person> ");
         return a;
       });
-
-  List<T> get columns;
 
   ColumnProto get proto;
 

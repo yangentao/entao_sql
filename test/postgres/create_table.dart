@@ -3,12 +3,12 @@ import 'package:postgres/postgres.dart';
 import 'package:println/println.dart';
 import 'package:test/test.dart';
 
-Future<PoolExecutor> _createExecutor() async {
+Future<TranscationalExecutor> _createExecutor() async {
   final endpoint = Endpoint(host: 'localhost', database: 'test', username: 'test', password: 'test');
   // final c = await Connection.open(endpoint, settings: ConnectionSettings(sslMode: SslMode.disable));
   // return PgConnectionExecutor(c, migrator: PgMigrator());
   final p = Pool.withEndpoints([endpoint], settings: PoolSettings(sslMode: SslMode.disable));
-  return PostgresPoolExecutor(p );
+  return PostgresPoolExecutor(p);
 }
 
 enum Person with TableColumn<Person> {
@@ -22,12 +22,9 @@ enum Person with TableColumn<Person> {
 
   @override
   final ColumnProto proto;
-
-  @override
-  List<Person> get columns => Person.values;
 }
 
-void main() async  {
+void main() async {
   test("auto inc", () async {
     final ex = await _createExecutor();
     ex.rawQuery("DROP TABLE Person ");

@@ -12,7 +12,7 @@ typedef PGType<T extends Object> = pg.Type<T>;
 // final _endpoint = Endpoint(host: 'localhost', database: 'test', username: 'test', password: 'test');
 // final poolPG = Pool.withEndpoints([_endpoint], settings: PoolSettings(sslMode: SslMode.disable));
 
-class PostgresPoolExecutor<T> implements PoolExecutor {
+class PostgresPoolExecutor<T> implements TranscationalExecutor {
   pg.Pool<T> pool;
   PostgresOptions? options;
   late final _PgSessionExecutor _se = _PgSessionExecutor(pool, options: options);
@@ -49,7 +49,7 @@ class PostgresPoolExecutor<T> implements PoolExecutor {
   }
 }
 
-class PostgresExecutor implements ConnectionExecutor {
+class PostgresExecutor implements TranscationalExecutor {
   pg.Connection connection;
   PostgresOptions? options;
   late final _PgSessionExecutor _se = _PgSessionExecutor(connection, options: options);

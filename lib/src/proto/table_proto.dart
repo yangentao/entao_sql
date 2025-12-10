@@ -4,7 +4,7 @@ class TableProto<E extends TableColumn> {
   final String name;
   final List<TableColumn<E>> columns;
   final String nameSQL;
-  final SQLExecutor executor;
+  final TranscationalExecutor executor;
   late final List<TableColumn<E>> primaryKeys = columns.filter((e) => e.proto.primaryKey);
 
   TableProto._(this.name, this.columns, {required this.executor}) : nameSQL = name.escapeSQL {
@@ -38,6 +38,18 @@ class TableProto<E extends TableColumn> {
   static bool isRegisted<T>() => _tableRegisterMap.containsKey(T);
 
   static final Map<Type, TableProto> _tableRegisterMap = {};
+
+  static Future<bool> register<T extends TableColumn<T>>(List<T> fields, {required TranscationalExecutor executor, OnMigrate? onMigrate}) async {
+    assert(fields.isNotEmpty);
+    if (TableProto.isRegisted<T>()) return false;
+    final tab = TableProto<T>._(fields.first.tableName, fields, executor: executor);
+    if (onMigrate != null) {
+      await executor.session((e) async {
+        await onMigrate.migrate(e, tab);
+      });
+    }
+    return true;
+  }
 }
 
 TableProto $(Type type) => TableProto.of(type);
