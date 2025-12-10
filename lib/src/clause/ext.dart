@@ -1,7 +1,6 @@
 part of '../sql.dart';
 
 extension StringExpressExt on String {
-
   Express get express => Express(this);
 
   String AS(String alias) => "$this AS $alias";
@@ -19,12 +18,10 @@ extension StringExpressExt on String {
   }
 }
 
-extension TableColumnExpresExt<T extends TableColumn<T>> on TableColumn<T> {
+extension TableColumnExpresExt on TableColumn {
   String AS(String alias) => "$fullname AS $alias";
 
   String get ASC => "$fullname ASC";
 
   String get DESC => "$fullname DESC";
 }
-
-

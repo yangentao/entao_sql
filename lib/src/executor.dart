@@ -19,12 +19,12 @@ abstract interface class TranscationalExecutor implements SQLExecutor {
 }
 
 abstract interface class OnMigrate {
-  Future<void> migrate<T extends TableColumn<T>>(SessionExecutor executor, TableProto<T> tableProto);
+  Future<void> migrate<T extends TableColumn>(SessionExecutor executor, TableProto<T> tableProto);
 }
 
 extension ConnectionExecutorTableExt on TranscationalExecutor {
   /// register(Person.values)
-  Future<bool> register<T extends TableColumn<T>>(List<T> fields, {OnMigrate? onMigrate}) async {
+  Future<bool> register<T extends TableColumn>(List<T> fields, {OnMigrate? onMigrate}) async {
     return await TableProto.register(fields, executor: this, onMigrate: onMigrate);
   }
 }

@@ -11,7 +11,7 @@ Future<TranscationalExecutor> _createExecutor() async {
   return PostgresPoolExecutor(p);
 }
 
-enum Person with TableColumn<Person> {
+enum Person with TableColumn  {
   id(BIGINT(primaryKey: true, autoInc: 1000)),
   name(VARCHAR(length: 128)),
   nValue(BIGINT()),

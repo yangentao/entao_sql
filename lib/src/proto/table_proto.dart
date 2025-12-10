@@ -2,14 +2,14 @@ part of '../sql.dart';
 
 class TableProto<E extends TableColumn> {
   final String name;
-  final List<TableColumn<E>> columns;
-  final String nameSQL;
+  final List<TableColumn> columns;
+  late final String nameSQL = name.escapeSQL;
   final TranscationalExecutor executor;
-  late final List<TableColumn<E>> primaryKeys = columns.filter((e) => e.proto.primaryKey);
+  late final List<TableColumn> primaryKeys = columns.filter((e) => e.proto.primaryKey);
 
-  TableProto._(this.name, this.columns, {required this.executor}) : nameSQL = name.escapeSQL {
+  TableProto._(this.columns, {required this.executor, String? name}) : this.name = (name ?? "$E") {
     for (var e in columns) {
-      e.tableProto = this;
+      e._tableProto = this;
     }
     _tableRegisterMap[E] = this;
   }
@@ -39,10 +39,10 @@ class TableProto<E extends TableColumn> {
 
   static final Map<Type, TableProto> _tableRegisterMap = {};
 
-  static Future<bool> register<T extends TableColumn<T>>(List<T> fields, {required TranscationalExecutor executor, OnMigrate? onMigrate}) async {
+  static Future<bool> register<T extends TableColumn>(List<T> fields, {required TranscationalExecutor executor, String? tableName, OnMigrate? onMigrate}) async {
     assert(fields.isNotEmpty);
     if (TableProto.isRegisted<T>()) return false;
-    final tab = TableProto<T>._(fields.first.tableName, fields, executor: executor);
+    final tab = TableProto<T>._(fields, name: tableName, executor: executor);
     if (onMigrate != null) {
       await executor.session((e) async {
         await onMigrate.migrate(e, tab);

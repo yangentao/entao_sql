@@ -6,7 +6,7 @@ class OnMigratorSQLite implements OnMigrate {
   OnMigratorSQLite({this.schema = 'main'});
 
   @override
-  Future<void> migrate<T extends TableColumn<T>>(SessionExecutor executor, TableProto<T> tableProto) async {
+  Future<void> migrate<T extends TableColumn>(SessionExecutor executor, TableProto<T> tableProto) async {
     await BasicSQLiteMigrator(executor, tableProto, schema: schema).migrate();
   }
 }

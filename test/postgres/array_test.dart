@@ -11,7 +11,7 @@ Future<TranscationalExecutor> _createExecutor() async {
   return PostgresPoolExecutor(p);
 }
 
-enum Person with TableColumn<Person> {
+enum Person with TableColumn {
   id(BIGINT(primaryKey: true, autoInc: 1000)),
   info(ARRAY<int>());
 
@@ -19,12 +19,9 @@ enum Person with TableColumn<Person> {
 
   @override
   final ColumnProto proto;
-
-  @override
-  List<Person> get columns => Person.values;
 }
 
-void main()async  {
+void main() async {
   test("array", () async {
     final ex = await _createExecutor();
     ex.rawQuery("DROP TABLE Person ");
@@ -37,7 +34,7 @@ void main()async  {
     expect(row?.get("id"), 1000);
     println(row!.get("info").runtimeType);
     QueryResult r = await ex.query([], from: Person, where: Person.id.EQ(1000));
-    expect(r.firstValue( "info"), equals([1, 2, 3]));
+    expect(r.firstValue("info"), equals([1, 2, 3]));
     r.dump();
   });
 }

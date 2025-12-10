@@ -6,7 +6,7 @@ class OnMigratorMySQL implements OnMigrate {
   OnMigratorMySQL({required this.database});
 
   @override
-  Future<void> migrate<T extends TableColumn<T>>(SessionExecutor executor, TableProto<T> tableProto) async {
+  Future<void> migrate<T extends TableColumn>(SessionExecutor executor, TableProto<T> tableProto) async {
     await BasicMySQLMigrator(executor, tableProto, schema: database).migrate();
   }
 }

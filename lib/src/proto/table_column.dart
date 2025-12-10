@@ -1,38 +1,34 @@
 part of '../sql.dart';
 
 /// don't use 'name', use 'columnName',  enum's name maybe renamed.
-mixin TableColumn<T extends Enum> on Enum {
-  String get tableName => exGetOrPut("tableName", () {
-        String a = "$T";
-        if (a == "Object") errorSQL("TableColumn MUST has a generic type parameter. forexample:  enum Person with TableColumn<Person> ");
-        return a;
-      });
-
+mixin TableColumn on Enum {
   ColumnProto get proto;
 
-  String get columnName => exGetOrPut("nameColumn", () => (proto.name ?? this.name));
+  String get tableName => tableProto.name;
 
-  String get nameSQL => exGetOrPut("nameSQL", () => columnName.escapeSQL);
+  String get columnName => proto.name ?? this.name;
 
-  String get fullname => exGetOrPut("fullname", () => "${tableName.escapeSQL}.$nameSQL");
-
-  TableProto get tableProto => exGet("tableProto");
-
-  set tableProto(TableProto p) {
-    exSet("tableProto", p);
+  String get nameSQL {
+    String? s = _getColumnProperty(this, "nameSQL");
+    if (s != null) return s;
+    String n = columnName.escapeSQL;
+    _setColumnProperty(this, "nameSQL", n);
+    return n;
   }
 
-  Map<String, dynamic> get _propMap => _columnPropMap.getOrPut(this, () => <String, dynamic>{});
-
-  V exGetOrPut<V>(String key, V Function() onMiss) {
-    return _propMap.getOrPut(key, onMiss);
+  String get fullname {
+    String? s = _getColumnProperty(this, "fullname");
+    if (s != null) return s;
+    String n = "${tableName.escapeSQL}.$nameSQL";
+    _setColumnProperty(this, "fullname", n);
+    return n;
   }
 
-  V? exGet<V>(String key) {
-    return _propMap[key];
-  }
+  TableProto get tableProto => _getColumnProperty(this, "tableProto");
 
-  void exSet(String key, dynamic value) => _propMap[key] = value;
+  set _tableProto(TableProto p) {
+    _setColumnProperty(this, "tableProto", p);
+  }
 
   V? get<V>(Object? container) {
     if (container == null) return null;
@@ -43,9 +39,28 @@ mixin TableColumn<T extends Enum> on Enum {
     _setModelValue(model, this.columnName, value);
   }
 
-  MapEntry<TableColumn<T>, dynamic> operator >>(dynamic value) {
-    return MapEntry<TableColumn<T>, dynamic>(this, proto.encode(value));
+  MapEntry<TableColumn, dynamic> operator >>(dynamic value) {
+    return MapEntry<TableColumn, dynamic>(this, proto.encode(value));
   }
 }
 
-final Map<Enum, Map<String, dynamic>> _columnPropMap = {};
+final Map<Enum, AnyMap> _columnPropMap = {};
+
+V? _getColumnProperty<V>(TableColumn column, String key) {
+  return _columnPropMap[column]?[key];
+}
+
+void _setColumnProperty(TableColumn column, String key, dynamic value) {
+  AnyMap? map = _columnPropMap[column];
+  if (map != null) {
+    if (value == null) {
+      map.remove(key);
+    } else {
+      map[key] = value;
+    }
+  } else {
+    if (value != null) {
+      _columnPropMap[column] = {key: value};
+    }
+  }
+}

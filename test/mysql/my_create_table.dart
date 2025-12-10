@@ -1,7 +1,7 @@
 import 'package:entao_sql/mysql.dart';
 import 'package:println/println.dart';
 
-enum Test with TableColumn<Test> {
+enum Test with TableColumn {
   id(BIGINT(primaryKey: true, autoInc: 1000)),
   name(VARCHAR(length: 128)),
   nValue(BIGINT()),
@@ -12,9 +12,6 @@ enum Test with TableColumn<Test> {
 
   @override
   final ColumnProto proto;
-
-  @override
-  List<Test> get columns => Test.values;
 }
 
 final endpoint = Endpoint(username: "root", password: "Yet19491001");
