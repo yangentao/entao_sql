@@ -8,7 +8,7 @@ class TableModel<E> {
 
   TableModel(this.model);
 
-  SQLExecutor get _executor => _proto.executor;
+  TranscationalExecutor get _executor => _proto.executor;
 
   String get _tableName => _proto.name;
 
