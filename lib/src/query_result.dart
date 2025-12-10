@@ -5,7 +5,7 @@ class QueryResult extends UnmodifiableListView<List<Object?>> {
   final ResultMeta meta;
   final Object? rawResult;
 
-  int labelIndex(String label) => meta.labelIndex(label);
+  int labelToIndex(String label) => meta.labelToIndex(label);
 
   QueryResult(List<List<Object?>> super.source, {required this.meta, this.rawResult, this.affectedRows = 0});
 }
@@ -18,7 +18,7 @@ class ResultMeta {
 
   int get length => columns.length;
 
-  int labelIndex(String label) => labelIndexMap[label] ?? errorSQL("NO label found");
+  int labelToIndex(String label) => labelIndexMap[label] ?? errorSQL("NO label found");
 }
 
 // TODO add Type type property.
@@ -35,9 +35,9 @@ class RowData extends UnmodifiableListView<Object?> {
 
   RowData(super.source, {required this.meta});
 
-  int labelIndex(String label) => meta.labelIndex(label);
+  int labelToIndex(String label) => meta.labelToIndex(label);
 
-  Object? named(String label) => this[labelIndex(label)];
+  Object? named(String label) => this[labelToIndex(label)];
 
   Object? get(Object key) {
     if (key case int n) return getOr(n);

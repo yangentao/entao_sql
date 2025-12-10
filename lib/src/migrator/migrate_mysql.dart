@@ -16,7 +16,6 @@ class BasicMySQLMigrator extends BasicMigrator {
 
   BasicMySQLMigrator(this.executor, super.tableProto, {required String super.schema});
 
-
   @override
   String autoIncDefine(String type) {
     return "$type AUTO_INCREMENT";
@@ -43,23 +42,20 @@ class BasicMySQLMigrator extends BasicMigrator {
   Future<Set<String>> tableFields() async {
     String sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
     QueryResult r = await execute(sql, [schema!, tableName]);
-    int nameIndex = r.labelIndex("COLUMN_NAME");
-    return r.map((e) => e[nameIndex] as String).toSet();
+    return r.listValues<String>("COLUMN_NAME").toSet();
   }
 
   @override
   Future<Set<String>> listIndex() async {
     String sql = "SELECT * FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
     QueryResult r = await execute(sql, [schema!, tableName]);
-    int nameIndex = r.labelIndex("INDEX_NAME");
-    return r.map((e) => e[nameIndex] as String).toSet();
+    return r.listValues<String>("INDEX_NAME").toSet();
   }
 
   @override
   Future<Set<String>> indexFields(String indexName) async {
     String sql = "SELECT * FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ?";
     QueryResult r = await execute(sql, [schema!, tableName, indexName]);
-    int nameIndex = r.labelIndex("COLUMN_NAME");
-    return r.map((e) => e[nameIndex] as String).toSet();
+    return r.listValues<String>("COLUMN_NAME").toSet();
   }
 }

@@ -8,12 +8,12 @@ extension QueryResultExt on QueryResult {
   /// key is  int index , OR String key
   T? firstValue<T>([Object col = 0]) {
     if (col case int n) return this.firstOrNull?[n] as T?;
-    return this.firstOrNull?[labelIndex(col.toString())] as T?;
+    return this.firstOrNull?[labelToIndex(col.toString())] as T?;
   }
 
   T? oneValue<T>({required int row, Object col = 0}) {
     if (col case int n) return this[row][n] as T?;
-    return this[row][labelIndex(col.toString())] as T?;
+    return this[row][labelToIndex(col.toString())] as T?;
   }
 
   /// col is  int index , OR String key
@@ -21,7 +21,7 @@ extension QueryResultExt on QueryResult {
     if (col case int n) {
       return this.mapList((e) => e[n] as T);
     }
-    int n = labelIndex(col.toString());
+    int n = labelToIndex(col.toString());
     return this.mapList((e) => e[n] as T);
   }
 
