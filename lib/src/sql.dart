@@ -28,8 +28,8 @@ part 'query_result_ext.dart';
 part 'utils/space_buffer.dart';
 part 'utils/sql_utils.dart';
 part 'migrator/migrate_mysql.dart';
-part 'migrator/migrate_pg.dart';
-part 'migrator/migrate_lite.dart';
+part 'migrator/migrate_postgres.dart';
+part 'migrator/migrate_sqlite.dart';
 typedef FutureCallback = Future<void> Function();
 typedef FutureOrCallback = FutureOr<void> Function();
 

@@ -28,7 +28,7 @@ void main()async  {
   test("array", () async {
     final ex = await _createExecutor();
     ex.rawQuery("DROP TABLE Person ");
-    await ex.register(Person.values, migrator: PgMigrator());
+    await ex.register(Person.values, migrator: OnMigratorPostgres(schema: "public"));
     RowData? row = await ex.insert(Person, values: [
       Person.info >> ARRAY_VALUE([1, 2, 3])
     ]);

@@ -1,60 +1,11 @@
 part of '../sql.dart';
 
-abstract class UtilMigratorPostgres extends UtilMigrator {
-  UtilMigratorPostgres(super.tableProto, {super.schema});
-
-  @override
-  String autoIncDefine(String type) {
-    String t = type.toUpperCase();
-    if (t == "SERIAL" || t == "BIGSERIAL" || t == "SMALLSERIAL") return t;
-    return "BIGSERIAL";
-  }
-
-  @override
-  Future<void> autoIncChangeBase(TableColumn field, int base) async {
-    await execute("ALTER SEQUENCE ${"${tableName}_${field.name}_seq"} RESTART WITH $base INCREMENT BY 1");
-  }
-}
-
-abstract class UtilMigratorSQLite extends UtilMigrator {
-  UtilMigratorSQLite(super.tableProto, {super.schema});
-
-  @override
-  String autoIncDefine(String type) {
-    return "$type AUTOINCREMENT";
-  }
-
-  @override
-  Future<void> autoIncChangeBase(TableColumn field, int base) async {
-    final tab = tableName.escapeSQL;
-    final rs = await this.execute("SELECT name, seq FROM sqlite_sequence WHERE name = $tab");
-    if (rs.isNotEmpty) {
-      this.execute("UPDATE sqlite_sequence SET seq = $base WHERE name = $tab");
-    } else {
-      this.execute("INSERT INTO sqlite_sequence(name, seq) VALUES( $tab, $base)");
-    }
-  }
-}
-
-abstract class UtilMigratorMySQL extends UtilMigrator {
-  UtilMigratorMySQL(super.tableProto, {super.schema});
-
-  @override
-  String autoIncDefine(String type) {
-    return "$type AUTO_INCREMENT";
-  }
-
-  @override
-  Future<void> autoIncChangeBase(TableColumn field, int base) async {
-    await execute("ALTER TABLE $tableName AUTO_INCREMENT = $base");
-  }
-}
-
-abstract class UtilMigrator {
+abstract class BasicMigrator {
   final TableProto tableProto;
   final String? schema;
+  late final String schemaTable = tableProto.nameSQL.withSchema(schema);
 
-  UtilMigrator(this.tableProto, {this.schema});
+  BasicMigrator(this.tableProto, {this.schema});
 
   List<TableColumn> get fields => tableProto.columns;
 
@@ -101,7 +52,7 @@ abstract class UtilMigrator {
 
   Future<void> createTable({List<String>? constraints, List<String>? options}) async {
     SpaceBuffer buf = SpaceBuffer();
-    buf << "CREATE TABLE IF NOT EXISTS $tableName (";
+    buf << "CREATE TABLE IF NOT EXISTS $schemaTable (";
     buf << fields.joinMap(", ", (e) => defineField(e));
 
     final pks = fields.filter((e) => e.proto.primaryKey);
@@ -150,12 +101,12 @@ abstract class UtilMigrator {
 
   Future<void> createIndex(List<String> fields) async {
     String idxName = makeIndexName(tableName, fields);
-    String sql = "CREATE INDEX IF NOT EXISTS $idxName ON $tableName (${fields.map((e) => e.escapeSQL).join(",")})";
+    String sql = "CREATE INDEX IF NOT EXISTS $idxName ON $schemaTable (${fields.map((e) => e.escapeSQL).join(",")})";
     await execute(sql);
   }
 
   Future<void> addColumn(TableColumn field) async {
-    String sql = "ALTER TABLE ${tableName.escapeSQL} ADD COLUMN ${defineField(field)}";
+    String sql = "ALTER TABLE $schemaTable ADD COLUMN ${defineField(field)}";
     await execute(sql);
   }
 

@@ -1,18 +1,37 @@
 part of '../sql.dart';
 
-class PgMigrator implements SQLMigrator {
+class OnMigratorPostgres implements OnMigrator {
+  final String schema;
+
+  OnMigratorPostgres({this.schema = "public"});
+
   @override
   Future<void> migrate<T extends TableColumn<T>>(SessionExecutor executor, TableProto<T> tableProto) async {
-    println("migrate",tableProto.name);
-    await _MigratorPg(executor, tableProto).migrate();
+    println("migrate", tableProto.name);
+    await BasicPostgresMigrator(executor, tableProto, schema: schema).migrate();
   }
 }
 
-class _MigratorPg extends UtilMigratorPostgres {
+class BasicPostgresMigrator extends BasicMigrator {
   final SessionExecutor executor;
 
   // ignore: unused_element_parameter
-  _MigratorPg(this.executor, super.tableProto, {super.schema = 'public'});
+  BasicPostgresMigrator(this.executor, super.tableProto, {super.schema});
+
+  String get schemaOrPublic => schema ?? "public";
+
+  @override
+  String autoIncDefine(String type) {
+    String t = type.toUpperCase();
+    if (t == "SERIAL" || t == "BIGSERIAL" || t == "SMALLSERIAL") return t;
+    return "BIGSERIAL";
+  }
+
+  @override
+  Future<void> autoIncChangeBase(TableColumn field, int base) async {
+    final seqName = "${tableName}_${field.name}_seq";
+    await execute("ALTER SEQUENCE ${seqName.withSchema(schemaOrPublic)} RESTART WITH $base INCREMENT BY 1");
+  }
 
   @override
   Future<QueryResult> execute(String sql, [AnyList? parameters]) async {
@@ -21,7 +40,7 @@ class _MigratorPg extends UtilMigratorPostgres {
 
   @override
   Future<bool> tableExists() async {
-    QueryResult r = await execute(r"SELECT 1 FROM pg_tables WHERE schemaname=$1 AND tablename=$2", [schema ?? "public", tableName]);
+    QueryResult r = await execute(r"SELECT 1 FROM pg_tables WHERE schemaname=$1 AND tablename=$2", [schemaOrPublic, tableName]);
     return r.isNotEmpty;
   }
 
@@ -35,13 +54,13 @@ class _MigratorPg extends UtilMigratorPostgres {
     AND c.relnamespace = n.oid
     AND a.attnum > 0
     ''';
-    QueryResult r = await execute(sql, [schema ?? "public", tableName]);
+    QueryResult r = await execute(sql, [schemaOrPublic, tableName]);
     return r.map((e) => e[0] as String).toSet();
   }
 
   @override
   Future<Set<String>> listIndex() async {
-    QueryResult r = await execute("SELECT indexname FROM pg_indexes WHERE schemaname=? AND tablename=?", [schema ?? "public", tableName]);
+    QueryResult r = await execute("SELECT indexname FROM pg_indexes WHERE schemaname=? AND tablename=?", [schemaOrPublic, tableName]);
     return r.map((e) => e[0] as String).toSet();
   }
 
@@ -56,7 +75,7 @@ class _MigratorPg extends UtilMigratorPostgres {
     AND c.relkind ='i'
     AND a.attnum > 0
     ''';
-    QueryResult r = await execute(sql, [schema ?? "public", indexName]);
+    QueryResult r = await execute(sql, [schemaOrPublic, indexName]);
     return r.map((e) => e[0] as String).toSet();
   }
 }

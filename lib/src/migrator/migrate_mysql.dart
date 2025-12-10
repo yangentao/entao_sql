@@ -1,20 +1,31 @@
 part of '../sql.dart';
 
-class MySQLMigrator implements SQLMigrator {
+class OnMigratorMySQL implements OnMigrator {
   final String database;
 
-  MySQLMigrator(this.database);
+  OnMigratorMySQL({required this.database});
 
   @override
   Future<void> migrate<T extends TableColumn<T>>(SessionExecutor executor, TableProto<T> tableProto) async {
-    await _MigratorMySQL(executor, tableProto, schema: database).migrate();
+    await BasicMySQLMigrator(executor, tableProto, schema: database).migrate();
   }
 }
 
-class _MigratorMySQL extends UtilMigratorMySQL {
+class BasicMySQLMigrator extends BasicMigrator {
   final SessionExecutor executor;
 
-  _MigratorMySQL(this.executor, super.tableProto, {required String super.schema});
+  BasicMySQLMigrator(this.executor, super.tableProto, {required String super.schema});
+
+
+  @override
+  String autoIncDefine(String type) {
+    return "$type AUTO_INCREMENT";
+  }
+
+  @override
+  Future<void> autoIncChangeBase(TableColumn field, int base) async {
+    await execute("ALTER TABLE $schemaTable AUTO_INCREMENT = $base");
+  }
 
   @override
   Future<QueryResult> execute(String sql, [AnyList? parameters]) async {

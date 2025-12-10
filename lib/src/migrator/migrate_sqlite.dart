@@ -1,17 +1,38 @@
 part of '../sql.dart';
 
-class SQLiteMigrator implements SQLMigrator {
+class OnMigratorSQLite implements OnMigrator {
+  final String schema;
+
+  OnMigratorSQLite({this.schema = 'main'});
+
   @override
   Future<void> migrate<T extends TableColumn<T>>(SessionExecutor executor, TableProto<T> tableProto) async {
-    await _MigratorLite(executor, tableProto).migrate();
+    await BasicSQLiteMigrator(executor, tableProto, schema: schema).migrate();
   }
 }
 
-class _MigratorLite extends UtilMigratorSQLite {
+class BasicSQLiteMigrator extends BasicMigrator {
   final SessionExecutor executor;
 
   // ignore: unused_element_parameter
-  _MigratorLite(this.executor, super.tableProto, {super.schema});
+  BasicSQLiteMigrator(this.executor, super.tableProto, {super.schema});
+
+  @override
+  String autoIncDefine(String type) {
+    return "$type AUTOINCREMENT";
+  }
+
+  @override
+  Future<void> autoIncChangeBase(TableColumn field, int base) async {
+    final seqTable = "sqlite_sequence".withSchema(schema);
+    final tab = tableName.escapeSQL;
+    final rs = await this.execute("SELECT name, seq FROM $seqTable WHERE name = $tab");
+    if (rs.isNotEmpty) {
+      this.execute("UPDATE $seqTable SET seq = $base WHERE name = $tab");
+    } else {
+      this.execute("INSERT INTO $seqTable(name, seq) VALUES( $tab, $base)");
+    }
+  }
 
   @override
   Future<QueryResult> execute(String sql, [AnyList? parameters]) async {
@@ -20,7 +41,7 @@ class _MigratorLite extends UtilMigratorSQLite {
 
   @override
   Future<bool> tableExists() async {
-    String sql = "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?";
+    String sql = "SELECT 1 FROM ${"sqlite_schema".withSchema(schema)} WHERE type = 'table' AND name = ?";
     QueryResult rs = await executor.rawQuery(sql, [tableName]);
     return rs.isNotEmpty;
   }

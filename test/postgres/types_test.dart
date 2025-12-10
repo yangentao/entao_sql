@@ -17,5 +17,7 @@ void main()  async {
     expect(ARRAY<BLOB>().type, "BYTEA[]");
     expect(ARRAY<TIME>().type, "TIME[]");
     expect(ARRAY<TIMETZ>().type, "TIMETZ[]");
+    expect(ARRAY<TIMESTAMP>().type, "TIMESTAMP[]");
+    expect(ARRAY<TIMESTAMPTZ>().type, "TIMESTAMPTZ[]");
   });
 }

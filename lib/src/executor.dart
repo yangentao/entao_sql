@@ -24,13 +24,13 @@ abstract interface class PoolExecutor implements SQLExecutor {
   FutureOr<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback);
 }
 
-abstract interface class SQLMigrator {
+abstract interface class OnMigrator {
   Future<void> migrate<T extends TableColumn<T>>(SessionExecutor executor, TableProto<T> tableProto);
 }
 
 extension ConnectionExecutorTableExt on ConnectionExecutor {
   /// register(Person.values)
-  Future<void> register<T extends TableColumn<T>>(List<T> fields, {SQLMigrator? migrator}) async {
+  Future<void> register<T extends TableColumn<T>>(List<T> fields, {OnMigrator? migrator}) async {
     assert(fields.isNotEmpty);
     if (TableProto.isRegisted<T>()) return;
     final tab = TableProto<T>._(fields.first.tableName, fields, executor: this);
@@ -48,7 +48,7 @@ extension ConnectionExecutorTableExt on ConnectionExecutor {
 
 extension PoolExecutorTableExt on PoolExecutor {
   /// register(Person.values)
-  Future<void> register<T extends TableColumn<T>>(List<T> fields, {SQLMigrator? migrator}) async {
+  Future<void> register<T extends TableColumn<T>>(List<T> fields, {OnMigrator? migrator}) async {
     assert(fields.isNotEmpty);
     if (TableProto.isRegisted<T>()) return;
     final tab = TableProto<T>._(fields.first.tableName, fields, executor: this);

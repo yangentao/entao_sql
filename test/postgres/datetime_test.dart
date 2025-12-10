@@ -28,7 +28,7 @@ void main() async {
   test("time", () async {
     final ex = await _createExecutor();
     ex.rawQuery("DROP TABLE Person ");
-    await ex.register(Person.values, migrator: PgMigrator());
+    await ex.register(Person.values, migrator: OnMigratorPostgres());
     DateTime now = DateTime.now();
     RowData? row = await ex.insert(Person, values: [Person.info >> TIMESTAMP_VALUE(now)]);
     println(row);
