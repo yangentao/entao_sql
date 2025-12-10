@@ -1,6 +1,6 @@
 part of '../sql.dart';
 
-class OnMigratorPostgres implements OnMigrator {
+class OnMigratorPostgres implements OnMigrate {
   final String schema;
 
   OnMigratorPostgres({this.schema = "public"});

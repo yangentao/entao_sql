@@ -28,7 +28,7 @@ void main() async {
   test("json", () async {
     final ex = await _createExecutor();
     ex.rawQuery("DROP TABLE Person ");
-    await ex.register(Person.values, migrator: OnMigratorPostgres());
+    await ex.register(Person.values, onMigrate: OnMigratorPostgres());
     RowData? row = await ex.insert(Person, values: [
       Person.info >> JSONB_VALUE([1, 2, 3])
     ]);

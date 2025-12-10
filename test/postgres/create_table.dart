@@ -31,7 +31,7 @@ void main() async  {
   test("auto inc", () async {
     final ex = await _createExecutor();
     ex.rawQuery("DROP TABLE Person ");
-    await ex.register(Person.values, migrator: OnMigratorPostgres());
+    await ex.register(Person.values, onMigrate: OnMigratorPostgres());
     RowData? row = await ex.insert(Person, values: [Person.name >> "entao", Person.nValue >> 33]);
     println(row);
     await ex.dump(Person);

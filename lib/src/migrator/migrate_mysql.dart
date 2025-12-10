@@ -1,6 +1,6 @@
 part of '../sql.dart';
 
-class OnMigratorMySQL implements OnMigrator {
+class OnMigratorMySQL implements OnMigrate {
   final String database;
 
   OnMigratorMySQL({required this.database});

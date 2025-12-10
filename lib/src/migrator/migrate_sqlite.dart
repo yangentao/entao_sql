@@ -1,6 +1,6 @@
 part of '../sql.dart';
 
-class OnMigratorSQLite implements OnMigrator {
+class OnMigratorSQLite implements OnMigrate {
   final String schema;
 
   OnMigratorSQLite({this.schema = 'main'});
