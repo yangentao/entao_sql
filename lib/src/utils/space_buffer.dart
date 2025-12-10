@@ -58,3 +58,15 @@ extension type SpaceBuffer.buf(StringBuffer buffer) implements StringBuffer {
     return this;
   }
 }
+
+extension Asss on StringBuffer {
+  StringBuffer operator <<(Object? value) {
+    this.write(value);
+    return this;
+  }
+
+  StringBuffer get newLine {
+    writeln("");
+    return this;
+  }
+}

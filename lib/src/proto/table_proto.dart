@@ -17,7 +17,7 @@ class TableProto<E extends TableColumn> {
   factory TableProto() {
     TableProto? p = _tableRegisterMap[E];
     if (p == null) {
-      errorSQL("NO table proto of '$E' found, migrate it first. for example: liteSQL.migrate(Person.values) ");
+      errorSQL("NO table proto of '$E' found, register it first.");
     }
     return p as TableProto<E>;
   }
@@ -30,7 +30,7 @@ class TableProto<E extends TableColumn> {
   static TableProto of(Type type) {
     TableProto? p = _tableRegisterMap[type];
     if (p == null) {
-      errorSQL("NO table proto of $type  found, migrate it first. ");
+      errorSQL("NO table proto of $type  found, register it first. ");
     }
     return p;
   }
