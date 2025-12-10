@@ -8,7 +8,7 @@ Future<SQLExecutor> _createExecutor() async {
   // final c = await Connection.open(endpoint, settings: ConnectionSettings(sslMode: SslMode.disable));
   // return PgConnectionExecutor(c, migrator: PgMigrator());
   final p = Pool.withEndpoints([endpoint], settings: PoolSettings(sslMode: SslMode.disable));
-  return PostgresPoolExecutor(p, migrator: PgMigrator());
+  return PostgresPoolExecutor(p );
 }
 
 enum Person with TableColumn<Person> {
@@ -31,7 +31,7 @@ void main() async  {
   test("auto inc", () async {
     final ex = await _createExecutor();
     ex.rawQuery("DROP TABLE Person ");
-    await ex.register(Person.values, migrate: true);
+    await ex.register(Person.values, migrator: PgMigrator());
     RowData? row = await ex.insert(Person, values: [Person.name >> "entao", Person.nValue >> 33]);
     println(row);
     await ex.dump(Person);

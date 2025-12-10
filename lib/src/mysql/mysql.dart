@@ -10,38 +10,12 @@ import '../sql.dart';
 part 'migrate.dart';
 part 'types.dart';
 
-class Endpoint {
-  // string or inet address.
-  final Object host;
-  final int port;
-  final String username;
-  final String password;
-
-  Endpoint({this.host = "localhost", this.port = 3306, required this.username, required this.password});
-}
-
-class ConnectionSettings {
-  final bool? secure;
-  final String? collation;
-  final SecurityContext? securityContext;
-  final bool Function(X509Certificate)? onBadCertificate;
-
-  ConnectionSettings({this.secure, this.collation, this.securityContext, this.onBadCertificate});
-}
-
-class PoolSettings extends ConnectionSettings {
-  int? timeoutMs;
-  int? maxConnections;
-
-  PoolSettings({this.maxConnections, this.timeoutMs, super.secure, super.collation, super.securityContext, super.onBadCertificate});
-}
-
-class MySQLPoolExecutor extends SQLExecutorTx {
+class MySQLPoolExecutor extends PoolExecutor {
   final MySQLConnectionPool pool;
 
-  MySQLPoolExecutor(this.pool, {required String database, super.migrator}) : super(defaultSchema: database);
+  MySQLPoolExecutor(this.pool);
 
-  static MySQLPoolExecutor create({required Endpoint endpoint, required String database, PoolSettings? settings}) {
+  static MySQLPoolExecutor create({required Endpoint endpoint, String? database, PoolSettings? settings}) {
     MySQLConnectionPool p = MySQLConnectionPool(
         host: endpoint.host,
         port: endpoint.port,
@@ -55,13 +29,7 @@ class MySQLPoolExecutor extends SQLExecutorTx {
         securityContext: settings?.securityContext,
         onBadCertificate: settings?.onBadCertificate);
 
-    return MySQLPoolExecutor(p, database: "", migrator: MySQLMigrator(database));
-  }
-
-  @override
-  FutureOr<int> lastInsertId() async {
-    final r = await rawQuery("SELECT LAST_INSERT_ID()");
-    return r.firstValue() ?? 0;
+    return MySQLPoolExecutor(p);
   }
 
   @override
@@ -83,17 +51,24 @@ class MySQLPoolExecutor extends SQLExecutorTx {
   }
 
   @override
-  FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) async {
+  FutureOr<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback) async {
     return await pool.transactional((c) async {
-      return await callback(MySQLExecutor(c, database: this.defaultSchema, migrator: migrator));
+      return await callback(MySQLExecutor(c));
+    });
+  }
+
+  @override
+  FutureOr<R> session<R>(FutureOr<R> Function(SessionExecutor) callback) {
+    return pool.withConnection((c) async {
+      return await callback(MySQLExecutor(c));
     });
   }
 }
 
-class MySQLExecutor extends SQLExecutorTx {
+class MySQLExecutor implements ConnectionExecutor, SessionExecutor {
   final MySQLConnection connection;
 
-  MySQLExecutor(this.connection, {required String database, super.migrator}) : super(defaultSchema: database);
+  MySQLExecutor(this.connection);
 
   static Future<MySQLExecutor> create({required Endpoint endpoint, required String database, ConnectionSettings? settings}) async {
     MySQLConnection c = await MySQLConnection.createConnection(
@@ -107,7 +82,7 @@ class MySQLExecutor extends SQLExecutorTx {
         securityContext: settings?.securityContext,
         onBadCertificate: settings?.onBadCertificate);
     await c.connect();
-    return MySQLExecutor(c, database: database, migrator: MySQLMigrator(database));
+    return MySQLExecutor(c);
   }
 
   @override
@@ -142,10 +117,15 @@ class MySQLExecutor extends SQLExecutorTx {
   }
 
   @override
-  FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) async {
+  FutureOr<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback) async {
     return connection.transactional((c) async {
       return await callback(this);
     });
+  }
+
+  @override
+  FutureOr<R> session<R>(FutureOr<R> Function(SessionExecutor) callback) async {
+    return await callback(this);
   }
 }
 
@@ -200,4 +180,30 @@ extension on IResultSet {
     }
     return QueryResult(all, meta: meta, rawResult: this, affectedRows: this.affectedRows.toInt());
   }
+}
+
+class Endpoint {
+  // string or inet address.
+  final Object host;
+  final int port;
+  final String username;
+  final String password;
+
+  Endpoint({this.host = "localhost", this.port = 3306, required this.username, required this.password});
+}
+
+class ConnectionSettings {
+  final bool? secure;
+  final String? collation;
+  final SecurityContext? securityContext;
+  final bool Function(X509Certificate)? onBadCertificate;
+
+  ConnectionSettings({this.secure, this.collation, this.securityContext, this.onBadCertificate});
+}
+
+class PoolSettings extends ConnectionSettings {
+  int? timeoutMs;
+  int? maxConnections;
+
+  PoolSettings({this.maxConnections, this.timeoutMs, super.secure, super.collation, super.securityContext, super.onBadCertificate});
 }

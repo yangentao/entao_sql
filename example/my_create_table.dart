@@ -17,7 +17,7 @@ enum Test with TableColumn<Test> {
   List<Test> get columns => Test.values;
 }
 
-final endpoint = Endpoint(username: "root", password: "Yet19491001");
+final endpoint = Endpoint(username: "test", password: "Test123");
 
 void main() async {
   println("main");
@@ -29,7 +29,7 @@ void main() async {
   // await e.connection.execute("DROP TABLE test");
   // await e.rawQuery("DROP TABLE test", []);
   println("main 2");
-  await e.register(Test.values, migrate: true);
+  await e.register(Test.values);
   println("main 3");
   RowData? row = await e.insert(Test, values: [Test.name >> "entao", Test.nValue >> 33]);
   println(row);

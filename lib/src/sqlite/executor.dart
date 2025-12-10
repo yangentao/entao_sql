@@ -1,9 +1,9 @@
 part of 'sqlite.dart';
 
-class SQliteExecutor extends SQLExecutorTx {
+class SQliteExecutor implements ConnectionExecutor, SessionExecutor {
   LiteSQL lite;
 
-  SQliteExecutor(this.lite, {super.migrator}) : super(defaultSchema: "main");
+  SQliteExecutor(this.lite);
 
   @override
   FutureOr<int> lastInsertId() => lite.lastInsertRowId;
@@ -42,7 +42,7 @@ class SQliteExecutor extends SQLExecutorTx {
   }
 
   @override
-  FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) async {
+  FutureOr<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback) async {
     lite.execute("BEGIN");
     try {
       final r = await callback(this);
@@ -54,9 +54,12 @@ class SQliteExecutor extends SQLExecutorTx {
     }
   }
 
-  Set<String> listTable([String? schema]) {
-    return lite.PRAGMA.table_list(schema: schema).map((e) => e.name).toSet();
+  @override
+  FutureOr<R> session<R>(FutureOr<R> Function(SessionExecutor) callback) async {
+    return await callback(this);
   }
+
+
 }
 
 extension ResultMetaSQLite on Cursor {

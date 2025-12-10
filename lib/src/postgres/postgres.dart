@@ -14,37 +14,85 @@ typedef PGType<T extends Object> = pg.Type<T>;
 // final _endpoint = Endpoint(host: 'localhost', database: 'test', username: 'test', password: 'test');
 // final poolPG = Pool.withEndpoints([_endpoint], settings: PoolSettings(sslMode: SslMode.disable));
 
-class PostgresPoolExecutor<T> extends _SessionExecutor implements SQLExecutorTx {
+class PostgresPoolExecutor<T> extends PoolExecutor {
   pg.Pool<T> pool;
+  PostgresOptions? options;
+  late final _PgSessionExecutor _se = _PgSessionExecutor(pool, options: options);
 
-  PostgresPoolExecutor(this.pool, {PostgresOptions? options, super.migrator}) : super(pool, options: options);
+  PostgresPoolExecutor(this.pool, {this.options});
 
   @override
-  FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) {
+  FutureOr<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback) {
     return pool.runTx((session) async {
-      return await callback(_SessionExecutor(session, options: options));
+      return await callback(_PgSessionExecutor(session, options: options));
     }, settings: options?.transactionSettings);
   }
-}
-
-class PostgresExecutor extends _SessionExecutor implements SQLExecutorTx {
-  pg.Connection connection;
-
-  PostgresExecutor(this.connection, {PostgresOptions? options, super.migrator}) : super(connection, options: options);
 
   @override
-  FutureOr<R> transaction<R>(FutureOr<R> Function(SQLExecutor) callback) {
-    return connection.runTx((session) async {
-      return await callback(_SessionExecutor(session, options: options));
+  FutureOr<R> session<R>(FutureOr<R> Function(SessionExecutor) callback) {
+    return pool.run((session) async {
+      return await callback(_PgSessionExecutor(session, options: options));
     }, settings: options?.transactionSettings);
+  }
+
+  @override
+  FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) {
+    return _se.multiQuery(sql, parametersList);
+  }
+
+  @override
+  FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]) {
+    return _se.rawQuery(sql, parameters);
+  }
+
+  @override
+  FutureOr<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]) {
+    return _se.streamQuery(sql, parameters);
   }
 }
 
-class _SessionExecutor extends SQLExecutor {
+class PostgresExecutor implements ConnectionExecutor {
+  pg.Connection connection;
+  PostgresOptions? options;
+  late final _PgSessionExecutor _se = _PgSessionExecutor(connection, options: options);
+
+  PostgresExecutor(this.connection, {this.options});
+
+  @override
+  FutureOr<R> session<R>(FutureOr<R> Function(SessionExecutor) callback) async {
+    return connection.run((session) async {
+      return await callback(_PgSessionExecutor(session, options: options));
+    }, settings: options?.transactionSettings);
+  }
+
+  @override
+  FutureOr<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback) {
+    return connection.runTx((session) async {
+      return await callback(_PgSessionExecutor(session, options: options));
+    }, settings: options?.transactionSettings);
+  }
+
+  @override
+  FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) {
+    return _se.multiQuery(sql, parametersList);
+  }
+
+  @override
+  FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]) {
+    return _se.rawQuery(sql, parameters);
+  }
+
+  @override
+  FutureOr<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]) {
+    return _se.streamQuery(sql, parameters);
+  }
+}
+
+class _PgSessionExecutor implements SessionExecutor {
   final pg.Session session;
   final PostgresOptions? options;
 
-  _SessionExecutor(this.session, {this.options, super.migrator}) : super(defaultSchema: "public");
+  _PgSessionExecutor(this.session, {this.options});
 
   @override
   FutureOr<int> lastInsertId() async {
@@ -87,11 +135,6 @@ class _SessionExecutor extends SQLExecutor {
     }
     st.dispose();
     return ls;
-  }
-
-  Future<Set<String>> listTable([String? schema]) async {
-    QueryResult r = await rawQuery("SELECT tablename FROM pg_tables WHERE schemaname=?", [schema ?? "public"]);
-    return r.map((e) => e[0] as String).toSet();
   }
 }
 

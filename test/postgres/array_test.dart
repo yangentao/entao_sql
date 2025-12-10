@@ -8,7 +8,7 @@ Future<SQLExecutor> _createExecutor() async {
   // final c = await Connection.open(endpoint, settings: ConnectionSettings(sslMode: SslMode.disable));
   // return PgConnectionExecutor(c, migrator: PgMigrator());
   final p = Pool.withEndpoints([endpoint], settings: PoolSettings(sslMode: SslMode.disable));
-  return PostgresPoolExecutor(p, migrator: PgMigrator());
+  return PostgresPoolExecutor(p);
 }
 
 enum Person with TableColumn<Person> {
@@ -28,7 +28,7 @@ void main()async  {
   test("array", () async {
     final ex = await _createExecutor();
     ex.rawQuery("DROP TABLE Person ");
-    await ex.register(Person.values, migrate: true);
+    await ex.register(Person.values, migrator: PgMigrator());
     RowData? row = await ex.insert(Person, values: [
       Person.info >> ARRAY_VALUE([1, 2, 3])
     ]);
