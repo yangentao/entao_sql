@@ -1,25 +1,27 @@
 part of '../sql.dart';
 
-class TableProto<E extends TableColumn> {
+class TableProto {
+  final Type type;
+
   final String name;
   final List<TableColumn> columns;
   late final String nameSQL = name.escapeSQL;
   final TranscationalExecutor executor;
   late final List<TableColumn> primaryKeys = columns.filter((e) => e.proto.primaryKey);
 
-  TableProto._(this.columns, {required this.executor, String? name}) : this.name = (name ?? "$E") {
+  TableProto._(this.columns, {required this.executor, required this.type, String? name}) : this.name = (name ?? "$type") {
     for (var e in columns) {
       e._tableProto = this;
     }
-    _tableRegisterMap[E] = this;
+    _tableRegisterMap[type] = this;
   }
 
-  factory TableProto() {
-    TableProto? p = _tableRegisterMap[E];
+  factory TableProto(Type type) {
+    TableProto? p = _tableRegisterMap[type];
     if (p == null) {
-      errorSQL("NO table proto of '$E' found, register it first.");
+      errorSQL("NO table proto of '$type' found, register it first.");
     }
-    return p as TableProto<E>;
+    return p;
   }
 
   TableColumn? find(String fieldName) {
@@ -42,7 +44,7 @@ class TableProto<E extends TableColumn> {
   static Future<bool> register<T extends TableColumn>(List<T> fields, {required TranscationalExecutor executor, String? tableName, OnMigrate? onMigrate}) async {
     assert(fields.isNotEmpty);
     if (TableProto.isRegisted<T>()) return false;
-    final tab = TableProto<T>._(fields, name: tableName, executor: executor);
+    final tab = TableProto._(fields, type: T, name: tableName, executor: executor);
     if (onMigrate != null) {
       await executor.session((e) async {
         await onMigrate.migrate(e, tab);

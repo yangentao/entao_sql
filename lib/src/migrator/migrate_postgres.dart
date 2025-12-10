@@ -6,7 +6,7 @@ class OnMigratorPostgres implements OnMigrate {
   OnMigratorPostgres({this.schema = "public"});
 
   @override
-  Future<void> migrate<T extends TableColumn>(SessionExecutor executor, TableProto<T> tableProto) async {
+  Future<void> migrate<T extends TableColumn>(SessionExecutor executor, TableProto tableProto) async {
     println("migrate", tableProto.name);
     await BasicPostgresMigrator(executor, tableProto, schema: schema).migrate();
   }

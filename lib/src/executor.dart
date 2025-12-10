@@ -19,7 +19,7 @@ abstract interface class TranscationalExecutor implements SQLExecutor {
 }
 
 abstract interface class OnMigrate {
-  Future<void> migrate<T extends TableColumn>(SessionExecutor executor, TableProto<T> tableProto);
+  Future<void> migrate<T extends TableColumn>(SessionExecutor executor, TableProto tableProto);
 }
 
 extension ConnectionExecutorTableExt on TranscationalExecutor {

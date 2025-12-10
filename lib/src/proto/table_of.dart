@@ -1,13 +1,16 @@
 part of '../sql.dart';
 
 // 顺序必须M在前, 这样可以推导出E的类型
-class TableOf<M extends TableModel<E>, E extends TableColumn> {
+class TableOf<M extends TableModel<E>, E> {
   final M Function(AnyMap) creator;
-  late final TableProto<E> proto = TableProto<E>();
+  late final TableProto proto;
+
   late final SQLExecutor defaultExecutor = proto.executor;
   late final List<TableColumn> primaryKeys = proto.columns.filter((e) => e.proto.primaryKey);
 
-  TableOf(this.creator);
+  TableOf(this.creator) {
+    proto = TableProto.of(E);
+  }
 
   String get tableName => proto.name;
 
