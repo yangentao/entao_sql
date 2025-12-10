@@ -1,18 +1,18 @@
-part of 'postgres.dart';
+part of '../sql.dart';
 
 class PgMigrator implements SQLMigrator {
   @override
-  Future<void> migrate<T extends TableColumn<T>>(SQLExecutor executor, TableProto<T> tableProto) async {
+  Future<void> migrate<T extends TableColumn<T>>(SessionExecutor executor, TableProto<T> tableProto) async {
     println("migrate",tableProto.name);
-    await _MigratorLite(executor, tableProto).migrate();
+    await _MigratorPg(executor, tableProto).migrate();
   }
 }
 
-class _MigratorLite extends UtilMigratorPostgres {
-  final SQLExecutor executor;
+class _MigratorPg extends UtilMigratorPostgres {
+  final SessionExecutor executor;
 
   // ignore: unused_element_parameter
-  _MigratorLite(this.executor, super.tableProto, {super.schema = 'public'});
+  _MigratorPg(this.executor, super.tableProto, {super.schema = 'public'});
 
   @override
   Future<QueryResult> execute(String sql, [AnyList? parameters]) async {

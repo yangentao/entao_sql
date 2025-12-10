@@ -1,4 +1,4 @@
-part of 'mysql.dart';
+part of '../sql.dart';
 
 class MySQLMigrator implements SQLMigrator {
   final String database;
@@ -6,15 +6,15 @@ class MySQLMigrator implements SQLMigrator {
   MySQLMigrator(this.database);
 
   @override
-  Future<void> migrate<T extends TableColumn<T>>(SQLExecutor executor, TableProto<T> tableProto) async {
-    await _MigratorLite(executor, tableProto, schema: database).migrate();
+  Future<void> migrate<T extends TableColumn<T>>(SessionExecutor executor, TableProto<T> tableProto) async {
+    await _MigratorMySQL(executor, tableProto, schema: database).migrate();
   }
 }
 
-class _MigratorLite extends UtilMigratorMySQL {
-  final SQLExecutor executor;
+class _MigratorMySQL extends UtilMigratorMySQL {
+  final SessionExecutor executor;
 
-  _MigratorLite(this.executor, super.tableProto, {required String super.schema});
+  _MigratorMySQL(this.executor, super.tableProto, {required String super.schema});
 
   @override
   Future<QueryResult> execute(String sql, [AnyList? parameters]) async {

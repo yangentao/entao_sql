@@ -6,7 +6,6 @@ import 'package:println/println.dart';
 
 import '../sql.dart';
 
-part 'migrate.dart';
 part 'types.dart';
 
 typedef PGType<T extends Object> = pg.Type<T>;

@@ -1,4 +1,4 @@
-part of 'sql.dart';
+part of '../sql.dart';
 
 abstract class UtilMigratorPostgres extends UtilMigrator {
   UtilMigratorPostgres(super.tableProto, {super.schema});

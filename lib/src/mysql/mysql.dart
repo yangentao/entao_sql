@@ -7,7 +7,6 @@ import 'package:println/println.dart';
 
 import '../sql.dart';
 
-part 'migrate.dart';
 part 'types.dart';
 
 class MySQLPoolExecutor implements PoolExecutor {

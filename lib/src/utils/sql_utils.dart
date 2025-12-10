@@ -25,6 +25,11 @@ extension StreamDoneExt<T> on Stream<T> {
 }
 
 extension StringSQLExt on String {
+  String withSchema(String? schema) {
+    if (schema == null || schema.isEmpty) return this;
+    return "$schema.$this";
+  }
+
   String get escapeSQL {
     if (!this._shouldEscapeSQL) return this;
     return this.quoted;

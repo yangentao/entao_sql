@@ -8,7 +8,7 @@ import 'package:entao_dutil/entao_dutil.dart';
 import 'package:entao_log/entao_log.dart';
 import 'package:println/println.dart';
 
-part 'basic_migrator.dart';
+part 'migrator/basic_migrator.dart';
 part 'clause/clauses.dart';
 part 'clause/express.dart';
 part 'clause/ext.dart';
@@ -27,7 +27,9 @@ part 'query_result.dart';
 part 'query_result_ext.dart';
 part 'utils/space_buffer.dart';
 part 'utils/sql_utils.dart';
-
+part 'migrator/migrate_mysql.dart';
+part 'migrator/migrate_pg.dart';
+part 'migrator/migrate_lite.dart';
 typedef FutureCallback = Future<void> Function();
 typedef FutureOrCallback = FutureOr<void> Function();
 

@@ -10,7 +10,6 @@ import 'sqlite3_ffi.dart' as xsql;
 part 'configs.dart';
 part 'executor.dart';
 part 'litesql.dart';
-part 'migrator.dart';
 part 'pragma.dart';
 part 'resultset.dart';
 part 'types.dart';
