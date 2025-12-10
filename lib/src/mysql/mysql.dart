@@ -10,7 +10,7 @@ import '../sql.dart';
 part 'migrate.dart';
 part 'types.dart';
 
-class MySQLPoolExecutor extends PoolExecutor {
+class MySQLPoolExecutor implements PoolExecutor {
   final MySQLConnectionPool pool;
 
   MySQLPoolExecutor(this.pool);

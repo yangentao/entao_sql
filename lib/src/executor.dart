@@ -18,29 +18,47 @@ abstract interface class ConnectionExecutor implements SQLExecutor {
   FutureOr<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback);
 }
 
-abstract mixin class PoolExecutor implements SQLExecutor {
+abstract interface class PoolExecutor implements SQLExecutor {
   FutureOr<R> session<R>(FutureOr<R> Function(SessionExecutor) callback);
 
   FutureOr<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback);
 }
 
-abstract class SQLMigrator {
-  Future<void> migrate<T extends TableColumn<T>>(SQLExecutor executor, TableProto<T> tableProto);
+abstract interface class SQLMigrator {
+  Future<void> migrate<T extends TableColumn<T>>(SessionExecutor executor, TableProto<T> tableProto);
 }
 
-extension ExecutorTableExt on SQLExecutor {
+extension ConnectionExecutorTableExt on ConnectionExecutor {
   /// register(Person.values)
   Future<void> register<T extends TableColumn<T>>(List<T> fields, {SQLMigrator? migrator}) async {
     assert(fields.isNotEmpty);
     if (TableProto.isRegisted<T>()) return;
     final tab = TableProto<T>._(fields.first.tableName, fields, executor: this);
     if (migrator != null) {
-      if (this case PoolExecutor pe) {
-        await pe.session((e) async {
+      if (this case SessionExecutor se) {
+        await migrator.migrate(se, tab);
+      } else {
+        await this.session((e) async {
           await migrator.migrate(e, tab);
         });
+      }
+    }
+  }
+}
+
+extension PoolExecutorTableExt on PoolExecutor {
+  /// register(Person.values)
+  Future<void> register<T extends TableColumn<T>>(List<T> fields, {SQLMigrator? migrator}) async {
+    assert(fields.isNotEmpty);
+    if (TableProto.isRegisted<T>()) return;
+    final tab = TableProto<T>._(fields.first.tableName, fields, executor: this);
+    if (migrator != null) {
+      if (this case SessionExecutor se) {
+        await migrator.migrate(se, tab);
       } else {
-        await migrator.migrate(this, tab);
+        await this.session((e) async {
+          await migrator.migrate(e, tab);
+        });
       }
     }
   }

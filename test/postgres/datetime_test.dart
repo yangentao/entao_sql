@@ -3,7 +3,7 @@ import 'package:postgres/postgres.dart';
 import 'package:println/println.dart';
 import 'package:test/test.dart';
 
-Future<SQLExecutor> _createExecutor() async {
+Future<PoolExecutor> _createExecutor() async {
   final endpoint = Endpoint(host: 'localhost', database: 'test', username: 'test', password: 'test');
   // final c = await Connection.open(endpoint, settings: ConnectionSettings(sslMode: SslMode.disable));
   // return PgConnectionExecutor(c, migrator: PgMigrator());

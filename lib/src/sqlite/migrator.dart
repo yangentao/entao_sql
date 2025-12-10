@@ -1,6 +1,6 @@
 part of 'sqlite.dart';
 
-class SQLiteMigrator extends SQLMigrator {
+class SQLiteMigrator implements SQLMigrator {
   @override
   Future<void> migrate<T extends TableColumn<T>>(SQLExecutor executor, TableProto<T> tableProto) async {
     await _MigratorLite((executor as SQliteExecutor).lite, tableProto).migrate();

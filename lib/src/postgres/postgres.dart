@@ -14,7 +14,7 @@ typedef PGType<T extends Object> = pg.Type<T>;
 // final _endpoint = Endpoint(host: 'localhost', database: 'test', username: 'test', password: 'test');
 // final poolPG = Pool.withEndpoints([_endpoint], settings: PoolSettings(sslMode: SslMode.disable));
 
-class PostgresPoolExecutor<T> extends PoolExecutor {
+class PostgresPoolExecutor<T> implements PoolExecutor {
   pg.Pool<T> pool;
   PostgresOptions? options;
   late final _PgSessionExecutor _se = _PgSessionExecutor(pool, options: options);

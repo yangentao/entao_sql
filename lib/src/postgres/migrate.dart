@@ -1,6 +1,6 @@
 part of 'postgres.dart';
 
-class PgMigrator extends SQLMigrator {
+class PgMigrator implements SQLMigrator {
   @override
   Future<void> migrate<T extends TableColumn<T>>(SQLExecutor executor, TableProto<T> tableProto) async {
     println("migrate",tableProto.name);

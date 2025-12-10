@@ -1,6 +1,6 @@
 part of 'mysql.dart';
 
-class MySQLMigrator extends SQLMigrator {
+class MySQLMigrator implements SQLMigrator {
   final String database;
 
   MySQLMigrator(this.database);

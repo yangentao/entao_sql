@@ -58,8 +58,6 @@ class SQliteExecutor implements ConnectionExecutor, SessionExecutor {
   FutureOr<R> session<R>(FutureOr<R> Function(SessionExecutor) callback) async {
     return await callback(this);
   }
-
-
 }
 
 extension ResultMetaSQLite on Cursor {
