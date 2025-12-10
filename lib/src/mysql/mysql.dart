@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:entao_dutil/entao_dutil.dart';
 import 'package:mysql_client_plus/mysql_client_plus.dart';
+import 'package:println/println.dart';
 
 import '../sql.dart';
 
@@ -123,8 +124,15 @@ class MySQLExecutor extends SQLExecutorTx {
 
   @override
   FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
-    final st = await connection.prepare(sql, false);
-    return await _StatementExecutor(st).rawQuery(parameters);
+    logQuery(sql, parameters);
+    try {
+      final st = await connection.prepare(sql, false);
+      return await _StatementExecutor(st).rawQuery(parameters);
+    } catch (e, st) {
+      println("query error: ", e);
+      println(st);
+      rethrow;
+    }
   }
 
   @override

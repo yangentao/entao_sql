@@ -1,5 +1,18 @@
 part of '../sql.dart';
 
+void logQuery(String sql, AnyList? parameters) {
+  logSQL.d("query: ", sql);
+  if (parameters.notEmpty) {
+    logSQL.d(">>>>", parameters);
+  }
+}
+
+extension AnyListEmptyExt<T> on List<T>? {
+  bool get empty => this == null || this!.isEmpty;
+
+  bool get notEmpty => this != null && this!.isNotEmpty;
+}
+
 extension StreamDoneExt<T> on Stream<T> {
   Stream<T> whenComplete(VoidCallback callback) {
     StreamController<T> controller = StreamController(onCancel: callback);
