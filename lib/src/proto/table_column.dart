@@ -48,7 +48,7 @@ mixin TableColumn<T extends Enum> on Enum {
   }
 
   MapEntry<TableColumn<T>, dynamic> operator >>(dynamic value) {
-    return MapEntry<TableColumn<T>, dynamic>(this, value);
+    return MapEntry<TableColumn<T>, dynamic>(this, proto.encode(value));
   }
 }
 

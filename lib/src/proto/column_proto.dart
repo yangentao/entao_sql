@@ -26,4 +26,10 @@ class ColumnProto {
     this.defaultValue,
     this.extras,
   });
+
+  /// decode from database value to dart value
+  Object? decode(Object? value) => value;
+
+  /// encode datr value to database value
+  Object? encode(Object? value) => value;
 }
