@@ -49,7 +49,10 @@ class TableModel<E> {
   Future<RowData?> updateByKey({List<Object>? columns, List<Object>? excludes, SQLExecutor? executor}) async {
     List<MapEntry<TableColumn, dynamic>> values = _fieldValues(columns: columns, excludes: excludes);
     values.removeWhere((e) => e.key.proto.primaryKey);
-    values.retainWhere((e) => e.value != null || true == columns?.contains(e.key.columnName));
+    values.retainWhere((e) => e.value != null);
+    if (columns != null && columns.isNotEmpty) {
+      values.retainWhere((e) => columns.contains(e.key.columnName));
+    }
     if (values.isEmpty) return null;
     Returning ret = Returning.ALL;
     QueryResult qr = await (executor ?? _executor).update(_tableName, values: values, where: _keyWhere, returning: ret);
@@ -63,7 +66,10 @@ class TableModel<E> {
   // only nonull field will be insert, or 'columns' contains it
   Future<RowData?> insert({List<Object>? columns, List<Object>? excludes, SQLExecutor? executor}) async {
     List<MapEntry<TableColumn, dynamic>> ls = _fieldValues(columns: columns, excludes: excludes);
-    ls.retainWhere((e) => e.value != null || true == columns?.contains(e.key.columnName));
+    ls.retainWhere((e) => e.value != null);
+    if (columns != null && columns.isNotEmpty) {
+      ls.retainWhere((e) => columns.contains(e.key.columnName));
+    }
     if (ls.isEmpty) return null;
     Returning ret = Returning.ALL;
     RowData? row = await (executor ?? _executor).insert(_tableName, values: ls, returning: ret);
@@ -76,7 +82,10 @@ class TableModel<E> {
   // only nonull field will be insert, or 'columns' contains it
   Future<RowData?> upsert({List<Object>? columns, List<Object>? excludes, SQLExecutor? executor}) async {
     List<MapEntry<TableColumn, dynamic>> ls = _fieldValues(columns: columns, excludes: excludes);
-    ls.retainWhere((e) => e.value != null || true == columns?.contains(e.key.columnName));
+    ls.retainWhere((e) => e.value != null);
+    if (columns != null && columns.isNotEmpty) {
+      ls.retainWhere((e) => columns.contains(e.key.columnName));
+    }
     if (ls.isEmpty) return null;
     Returning ret = Returning.ALL;
     RowData? row = await (executor ?? _executor).upsert(_tableName, values: ls, constraints: _proto.primaryKeys, returning: ret);
