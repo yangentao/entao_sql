@@ -32,25 +32,25 @@ class MySQLPoolExecutor implements TranscationalExecutor {
   }
 
   @override
-  FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) async {
+  Future<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) async {
     final st = await pool.prepare(sql, false);
     return await _StatementExecutor(st).multiQuery(parametersList);
   }
 
   @override
-  FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
+  Future<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
     final st = await pool.prepare(sql, false);
     return await _StatementExecutor(st).rawQuery(parameters);
   }
 
   @override
-  FutureOr<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]) async {
+  Future<StreamIterator<RowData>> streamQuery(String sql, [AnyList? parameters]) async {
     final st = await pool.prepare(sql, true);
     return await _StatementExecutor(st).streamQuery(parameters);
   }
 
   @override
-  FutureOr<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback) async {
+  Future<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback) async {
     return await pool.transactional((c) async {
       return await callback(MySQLExecutor(c));
     });
@@ -85,19 +85,19 @@ class MySQLExecutor implements TranscationalExecutor, SessionExecutor {
   }
 
   @override
-  FutureOr<int> lastInsertId() async {
+  Future<int> lastInsertId() async {
     final r = await rawQuery("SELECT LAST_INSERT_ID()");
     return r.firstValue() ?? 0;
   }
 
   @override
-  FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) async {
+  Future<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) async {
     final st = await connection.prepare(sql, false);
     return await _StatementExecutor(st).multiQuery(parametersList);
   }
 
   @override
-  FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
+  Future<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
     logQuery(sql, parameters);
     try {
       final st = await connection.prepare(sql, false);
@@ -110,20 +110,20 @@ class MySQLExecutor implements TranscationalExecutor, SessionExecutor {
   }
 
   @override
-  FutureOr<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]) async {
+  Future<StreamIterator<RowData>> streamQuery(String sql, [AnyList? parameters]) async {
     final st = await connection.prepare(sql, true);
     return await _StatementExecutor(st).streamQuery(parameters);
   }
 
   @override
-  FutureOr<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback) async {
+  Future<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback) async {
     return connection.transactional((c) async {
       return await callback(this);
     });
   }
 
   @override
-  FutureOr<R> session<R>(FutureOr<R> Function(SessionExecutor) callback) async {
+  Future<R> session<R>(FutureOr<R> Function(SessionExecutor) callback) async {
     return await callback(this);
   }
 }
@@ -133,7 +133,7 @@ class _StatementExecutor {
 
   _StatementExecutor(this.statment);
 
-  FutureOr<List<QueryResult>> multiQuery(Iterable<AnyList> parametersList) async {
+  Future<List<QueryResult>> multiQuery(Iterable<AnyList> parametersList) async {
     List<QueryResult> all = [];
     for (AnyList ls in parametersList) {
       IResultSet rs = await statment.execute(ls);
@@ -143,14 +143,14 @@ class _StatementExecutor {
     return all;
   }
 
-  FutureOr<QueryResult> rawQuery([AnyList? parameters]) async {
+  Future<QueryResult> rawQuery([AnyList? parameters]) async {
     IResultSet rs = await statment.execute(parameters ?? const []);
     final qr = rs.queryResult();
     await statment.deallocate();
     return qr;
   }
 
-  FutureOr<Stream<RowData>> streamQuery([AnyList? parameters]) async {
+  Future<StreamIterator<RowData>> streamQuery([AnyList? parameters]) async {
     IResultSet rs = await statment.execute(parameters ?? const []);
     ResultMeta meta = rs.meta;
     Stream<RowData> s = rs.rowsStream.map((e) {
@@ -160,8 +160,7 @@ class _StatementExecutor {
       }
       return RowData(ls, meta: meta);
     });
-    s.whenComplete(() => statment.deallocate());
-    return s;
+    return RowStreamIterator(s, onComplete: () => statment.deallocate());
   }
 }
 

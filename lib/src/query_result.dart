@@ -51,3 +51,31 @@ class RowData extends UnmodifiableListView<Object?> {
     return toMap().toString();
   }
 }
+
+class RowStreamIterator implements StreamIterator<RowData> {
+  final StreamIterator<RowData> _streamIterator;
+  final VoidCallback _onComplete;
+
+  RowStreamIterator(Stream<RowData> stream, {required void Function() onComplete})
+      : _onComplete = onComplete,
+        _streamIterator = StreamIterator(stream);
+
+  @override
+  Future<dynamic> cancel() async {
+    var v = await _streamIterator.cancel();
+    _onComplete();
+    return v;
+  }
+
+  @override
+  RowData get current => _streamIterator.current;
+
+  @override
+  Future<bool> moveNext() async {
+    bool ok = await _streamIterator.moveNext();
+    if (!ok) {
+      _onComplete();
+    }
+    return ok;
+  }
+}

@@ -6,18 +6,14 @@ class SQliteExecutor implements TranscationalExecutor, SessionExecutor {
   SQliteExecutor(this.lite);
 
   @override
-  FutureOr<int> lastInsertId() => lite.lastInsertRowId;
+  int lastInsertId() => lite.lastInsertRowId;
 
   @override
-  Stream<RowData> streamQuery(String sql, [AnyList? parameters]) async* {
+  StreamIterator<RowData> streamQuery(String sql, [AnyList? parameters]) {
     lite.lastInsertRowId = 0;
     PreparedStatement ps = lite.prepareSQL(sql);
     IteratingCursor ic = ps.selectCursor(parameters ?? const []);
-    ResultMeta meta = ic.meta;
-    while (ic.moveNext()) {
-      yield RowData(ic.current.values, meta: meta);
-    }
-    ps.close();
+    return _SqliteStreamIterator(ic, onComplete: () => ps.close());
   }
 
   @override
@@ -67,5 +63,29 @@ extension ResultMetaSQLite on Cursor {
 extension ResultSetQueryResult on ResultSet {
   QueryResult queryResult({int affectedRows = 0}) {
     return QueryResult(rows, meta: meta, rawResult: this, affectedRows: affectedRows);
+  }
+}
+
+class _SqliteStreamIterator implements StreamIterator<RowData> {
+  final IteratingCursor _cursor;
+  final VoidCallback _onComplete;
+
+  _SqliteStreamIterator(this._cursor, {required void Function() onComplete}) : _onComplete = onComplete;
+
+  @override
+  Future<dynamic> cancel() async {
+    _onComplete();
+  }
+
+  @override
+  RowData get current => RowData(_cursor.current.values, meta: _cursor.meta);
+
+  @override
+  Future<bool> moveNext() async {
+    bool ok = _cursor.moveNext();
+    if (!ok) {
+      _onComplete();
+    }
+    return ok;
   }
 }

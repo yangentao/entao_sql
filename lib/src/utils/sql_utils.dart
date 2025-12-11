@@ -1,5 +1,7 @@
 part of '../sql.dart';
 
+
+
 void logQuery(String sql, AnyList? parameters) {
   logSQL.d("query: ", sql);
   if (parameters.notEmpty) {

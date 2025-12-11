@@ -5,7 +5,7 @@ abstract interface class SQLExecutor {
 
   FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList);
 
-  FutureOr<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]);
+  FutureOr<StreamIterator<RowData>> streamQuery(String sql, [AnyList? parameters]);
 }
 
 abstract interface class SessionExecutor implements SQLExecutor {

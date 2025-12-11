@@ -20,31 +20,31 @@ class PostgresPoolExecutor<T> implements TranscationalExecutor {
   PostgresPoolExecutor(this.pool, {this.options});
 
   @override
-  FutureOr<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback) {
+  Future<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback) {
     return pool.runTx((session) async {
       return await callback(_PgSessionExecutor(session, options: options));
     }, settings: options?.transactionSettings);
   }
 
   @override
-  FutureOr<R> session<R>(FutureOr<R> Function(SessionExecutor) callback) {
+  Future<R> session<R>(FutureOr<R> Function(SessionExecutor) callback) {
     return pool.run((session) async {
       return await callback(_PgSessionExecutor(session, options: options));
     }, settings: options?.transactionSettings);
   }
 
   @override
-  FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) {
+  Future<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) {
     return _se.multiQuery(sql, parametersList);
   }
 
   @override
-  FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]) {
+  Future<QueryResult> rawQuery(String sql, [AnyList? parameters]) {
     return _se.rawQuery(sql, parameters);
   }
 
   @override
-  FutureOr<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]) {
+  Future<StreamIterator<RowData>> streamQuery(String sql, [AnyList? parameters]) {
     return _se.streamQuery(sql, parameters);
   }
 }
@@ -57,31 +57,31 @@ class PostgresExecutor implements TranscationalExecutor {
   PostgresExecutor(this.connection, {this.options});
 
   @override
-  FutureOr<R> session<R>(FutureOr<R> Function(SessionExecutor) callback) async {
+  Future<R> session<R>(FutureOr<R> Function(SessionExecutor) callback) async {
     return connection.run((session) async {
       return await callback(_PgSessionExecutor(session, options: options));
     }, settings: options?.transactionSettings);
   }
 
   @override
-  FutureOr<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback) {
+  Future<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback) {
     return connection.runTx((session) async {
       return await callback(_PgSessionExecutor(session, options: options));
     }, settings: options?.transactionSettings);
   }
 
   @override
-  FutureOr<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) {
+  Future<List<QueryResult>> multiQuery(String sql, Iterable<AnyList> parametersList) {
     return _se.multiQuery(sql, parametersList);
   }
 
   @override
-  FutureOr<QueryResult> rawQuery(String sql, [AnyList? parameters]) {
+  Future<QueryResult> rawQuery(String sql, [AnyList? parameters]) {
     return _se.rawQuery(sql, parameters);
   }
 
   @override
-  FutureOr<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]) {
+  Future<StreamIterator<RowData>> streamQuery(String sql, [AnyList? parameters]) {
     return _se.streamQuery(sql, parameters);
   }
 }
@@ -93,20 +93,20 @@ class _PgSessionExecutor implements SessionExecutor {
   _PgSessionExecutor(this.session, {this.options});
 
   @override
-  FutureOr<int> lastInsertId() async {
+  Future<int> lastInsertId() async {
     final r = await rawQuery("SELECT lastval()");
     return r.firstValue() ?? 0;
   }
 
   @override
-  Future<Stream<RowData>> streamQuery(String sql, [AnyList? parameters]) async {
+  Future<StreamIterator<RowData>> streamQuery(String sql, [AnyList? parameters]) async {
     logSQL.d("streamQuery SQL: ", sql);
     if (parameters?.isNotEmpty == true) {
       logSQL.d(">>>>", parameters);
     }
     pg.Statement st = await session.prepare(sql.paramPositioned);
     Stream<RowData> s = st.bind(parameters).map((r) => RowData(r, meta: r.schema.meta));
-    return s.whenComplete(() => st.dispose());
+    return RowStreamIterator(s, onComplete: () => st.dispose());
   }
 
   @override
