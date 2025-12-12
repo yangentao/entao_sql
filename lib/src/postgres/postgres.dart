@@ -19,6 +19,10 @@ class PostgresPoolExecutor<T> implements TranscationalExecutor {
 
   PostgresPoolExecutor(this.pool, {this.options});
 
+  PostgresPoolExecutor.from({String host = "localhost", int port = 5432, required String username, required String password, required String database, this.options})
+      : pool = pg.Pool.withEndpoints([pg.Endpoint(host: host, port: port, database: database, username: username, password: password)],
+            settings: pg.PoolSettings(maxConnectionCount: 10, sslMode: pg.SslMode.disable));
+
   @override
   Future<R> transaction<R>(FutureOr<R> Function(SessionExecutor) callback) {
     return pool.runTx((session) async {
@@ -55,6 +59,13 @@ class PostgresExecutor implements TranscationalExecutor {
   late final _PgSessionExecutor _se = _PgSessionExecutor(connection, options: options);
 
   PostgresExecutor(this.connection, {this.options});
+
+  static Future<PostgresExecutor> open(
+      {String host = "localhost", int port = 5432, required String username, required String password, required String database, bool ssl = false}) async {
+    final c = await pg.Connection.open(pg.Endpoint(host: host, port: port, database: database, username: username, password: password),
+        settings: pg.ConnectionSettings(sslMode: ssl ? pg.SslMode.require : pg.SslMode.disable));
+    return PostgresExecutor(c);
+  }
 
   @override
   Future<R> session<R>(FutureOr<R> Function(SessionExecutor) callback) async {

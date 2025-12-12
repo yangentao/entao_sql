@@ -46,7 +46,7 @@ class TableProto {
     if (TableProto.isRegisted<T>()) return false;
     final tab = TableProto._(fields, type: T, name: tableName, executor: executor);
     if (onMigrate != null) {
-      await executor.session((e) async {
+      await executor.transaction((e) async {
         await onMigrate.migrate(e, tab);
       });
     }

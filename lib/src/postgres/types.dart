@@ -203,7 +203,7 @@ class BLOB extends ColumnProto {
 
 class VARCHAR extends ColumnProto {
   const VARCHAR({
-    required int length,
+    int length = 256,
     super.name,
     super.primaryKey = false,
     super.notNull = false,
@@ -233,6 +233,7 @@ class CHAR extends ColumnProto {
 
 class TEXT extends ColumnProto {
   const TEXT({
+    int? length,
     super.name,
     super.primaryKey = false,
     super.notNull = false,
@@ -242,7 +243,7 @@ class TEXT extends ColumnProto {
     super.uniqueName,
     super.defaultValue,
     super.extras,
-  }) : super(type: "TEXT");
+  }) : super(type: length == null ? "TEXT" : "VARCHAR($length)");
 }
 
 class FLOAT32 extends ColumnProto {
