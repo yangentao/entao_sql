@@ -14,6 +14,7 @@ class OnMigratorPostgres implements OnMigrate {
 
 class BasicPostgresMigrator extends BasicMigrator {
   final SessionExecutor executor;
+  late final String tableLower = tableProto.name.toLowerCase();
 
   // ignore: unused_element_parameter
   BasicPostgresMigrator(this.executor, super.tableProto, {super.schema});
@@ -29,7 +30,7 @@ class BasicPostgresMigrator extends BasicMigrator {
 
   @override
   Future<void> autoIncChangeBase(TableColumn field, int base) async {
-    final seqName = "${tableName}_${field.name}_seq";
+    final seqName = "${tableLower}_${field.name.toLowerCase()}_seq";
     await execute("ALTER SEQUENCE ${seqName.withSchema(schemaOrPublic)} RESTART WITH $base INCREMENT BY 1");
   }
 
@@ -40,7 +41,7 @@ class BasicPostgresMigrator extends BasicMigrator {
 
   @override
   Future<bool> tableExists() async {
-    QueryResult r = await execute(r"SELECT 1 FROM pg_tables WHERE schemaname=$1 AND tablename=$2", [schemaOrPublic, tableName]);
+    QueryResult r = await execute(r"SELECT 1 FROM pg_tables WHERE schemaname=$1 AND tablename=$2", [schemaOrPublic, tableLower]);
     return r.isNotEmpty;
   }
 
@@ -54,13 +55,13 @@ class BasicPostgresMigrator extends BasicMigrator {
     AND c.relnamespace = n.oid
     AND a.attnum > 0
     ''';
-    QueryResult r = await execute(sql, [schemaOrPublic, tableName]);
+    QueryResult r = await execute(sql, [schemaOrPublic, tableLower]);
     return r.map((e) => e[0] as String).toSet();
   }
 
   @override
   Future<Set<String>> listIndex() async {
-    QueryResult r = await execute("SELECT indexname FROM pg_indexes WHERE schemaname=? AND tablename=?", [schemaOrPublic, tableName]);
+    QueryResult r = await execute("SELECT indexname FROM pg_indexes WHERE schemaname=? AND tablename=?", [schemaOrPublic, tableLower]);
     return r.map((e) => e[0] as String).toSet();
   }
 

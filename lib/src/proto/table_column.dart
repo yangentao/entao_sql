@@ -6,23 +6,11 @@ mixin TableColumn on Enum {
 
   String get tableName => tableProto.name;
 
-  String get columnName => proto.name ?? this.name;
+  String get columnName => _ensureColumnProperty(this, "columnName", () => (proto.name ?? this.name).toLowerCase());
 
-  String get nameSQL {
-    String? s = _getColumnProperty(this, "nameSQL");
-    if (s != null) return s;
-    String n = columnName.escapeSQL;
-    _setColumnProperty(this, "nameSQL", n);
-    return n;
-  }
+  String get nameSQL => _ensureColumnProperty(this, "nameSQL", () => columnName.escapeSQL);
 
-  String get fullname {
-    String? s = _getColumnProperty(this, "fullname");
-    if (s != null) return s;
-    String n = "${tableName.escapeSQL}.$nameSQL";
-    _setColumnProperty(this, "fullname", n);
-    return n;
-  }
+  String get fullname => _ensureColumnProperty(this, "fullname", () => "${tableName.escapeSQL}.$nameSQL");
 
   TableProto get tableProto => _getColumnProperty(this, "tableProto");
 
@@ -63,4 +51,12 @@ void _setColumnProperty(TableColumn column, String key, dynamic value) {
       _columnPropMap[column] = {key: value};
     }
   }
+}
+
+V _ensureColumnProperty<V extends Object>(TableColumn column, String key, V Function() onMiss) {
+  V? v = _getColumnProperty(column, key);
+  if (v != null) return v;
+  v = onMiss();
+  _setColumnProperty(column, key, v);
+  return v;
 }

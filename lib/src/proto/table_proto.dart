@@ -9,7 +9,7 @@ class TableProto {
   final TranscationalExecutor executor;
   late final List<TableColumn> primaryKeys = columns.filter((e) => e.proto.primaryKey);
 
-  TableProto._(this.columns, {required this.executor, required this.type, String? name}) : this.name = (name ?? "$type") {
+  TableProto._(this.columns, {required this.executor, required this.type, String? name}) : this.name = (name ?? "$type").toLowerCase() {
     for (var e in columns) {
       e._tableProto = this;
     }

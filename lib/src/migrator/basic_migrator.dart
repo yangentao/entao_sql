@@ -27,6 +27,7 @@ abstract class BasicMigrator {
 
   Future<void> migrate() async {
     if (!await tableExists()) {
+      print("table exists? NO");
       await createTable();
       return;
     }
