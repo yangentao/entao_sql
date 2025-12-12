@@ -1,12 +1,14 @@
 part of '../sql.dart';
 
 class TableModel<E> {
-  AnyMap model;
+  AnyMap model = ICaseMap();
   final Type _tableType = E;
   final Set<String> _modifiedKeys = {};
   late final TableProto _proto = TableProto.of(E);
 
-  TableModel(this.model);
+  TableModel(AnyMap model) {
+    this.model.addAll(model);
+  }
 
   TranscationalExecutor get _executor => _proto.executor;
 
