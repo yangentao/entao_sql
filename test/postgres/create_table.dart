@@ -27,7 +27,7 @@ enum Person with TableColumn  {
 void main() async {
   test("auto inc", () async {
     final ex = await _createExecutor();
-    ex.rawQuery("DROP TABLE Person ");
+    ex.execute("DROP TABLE Person ");
     await ex.register(Person.values, onMigrate: OnMigratorPostgres());
     RowData? row = await ex.insert(Person, values: [Person.name >> "entao", Person.nValue >> 33]);
     println(row);

@@ -19,7 +19,7 @@ final endpoint = Endpoint(username: "root", password: "Yet19491001");
 void main() async {
   MySQLExecutor e = await MySQLExecutor.create(endpoint: endpoint, database: "test");
   OnMigratorMySQL mig = OnMigratorMySQL(database: "test");
-  await e.rawQuery("DROP TABLE IF EXISTS test");
+  await e.execute("DROP TABLE IF EXISTS test");
   await e.register(Test.values, onMigrate: mig);
   RowData? row = await e.insert(Test, values: [Test.name >> "entao", Test.nValue >> 33]);
   println(row);

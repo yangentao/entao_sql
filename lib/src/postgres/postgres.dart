@@ -43,8 +43,8 @@ class PostgresPoolExecutor<T> implements TranscationalExecutor {
   }
 
   @override
-  Future<QueryResult> rawQuery(String sql, [AnyList? parameters]) {
-    return _se.rawQuery(sql, parameters);
+  Future<QueryResult> execute(String sql, [AnyList? parameters]) {
+    return _se.execute(sql, parameters);
   }
 
   @override
@@ -87,8 +87,8 @@ class PostgresExecutor implements TranscationalExecutor {
   }
 
   @override
-  Future<QueryResult> rawQuery(String sql, [AnyList? parameters]) {
-    return _se.rawQuery(sql, parameters);
+  Future<QueryResult> execute(String sql, [AnyList? parameters]) {
+    return _se.execute(sql, parameters);
   }
 
   @override
@@ -105,7 +105,7 @@ class _PgSessionExecutor implements SessionExecutor {
 
   @override
   Future<int> lastInsertId() async {
-    final r = await rawQuery("SELECT lastval()");
+    final r = await execute("SELECT lastval()");
     return r.firstValue() ?? 0;
   }
 
@@ -121,7 +121,7 @@ class _PgSessionExecutor implements SessionExecutor {
   }
 
   @override
-  Future<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
+  Future<QueryResult> execute(String sql, [AnyList? parameters]) async {
     logSQL.d("rawQuery SQL: ", sql);
     if (parameters?.isNotEmpty == true) {
       logSQL.d(">>>>", parameters);

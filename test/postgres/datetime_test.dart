@@ -24,7 +24,7 @@ enum Person with TableColumn {
 void main() async {
   test("time", () async {
     final ex = await _createExecutor();
-    ex.rawQuery("DROP TABLE Person ");
+    ex.execute("DROP TABLE Person ");
     await ex.register(Person.values, onMigrate: OnMigratorPostgres());
     DateTime now = DateTime.now();
     RowData? row = await ex.insert(Person, values: [Person.info >> TIMESTAMP_VALUE(now)]);

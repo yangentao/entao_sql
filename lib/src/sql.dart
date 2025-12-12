@@ -41,7 +41,7 @@ typedef ModelCreator<T> = T Function(AnyMap);
 typedef ColumnValue<T extends Object> = MapEntry<T, dynamic>;
 
 extension ExpressExecutorExt<T extends Express> on T {
-  Future<QueryResult> query(SQLExecutor e) async => await e.rawQuery(this.sql, args);
+  Future<QueryResult> query(SQLExecutor e) async => await e.execute(this.sql, args);
 }
 
 String makeIndexName(String table, List<String> fields) {

@@ -36,31 +36,31 @@ class BasicSQLiteMigrator extends BasicMigrator {
 
   @override
   Future<QueryResult> execute(String sql, [AnyList? parameters]) async {
-    return await executor.rawQuery(sql, parameters);
+    return await executor.execute(sql, parameters);
   }
 
   @override
   Future<bool> tableExists() async {
     String sql = "SELECT 1 FROM ${"sqlite_schema".withSchema(schema)} WHERE type = 'table' AND name = ?";
-    QueryResult rs = await executor.rawQuery(sql, [tableName]);
+    QueryResult rs = await executor.execute(sql, [tableName]);
     return rs.isNotEmpty;
   }
 
   @override
   Future<Set<String>> tableFields() async {
-    QueryResult r = await executor.rawQuery("PRAGMA ${"table_info".withSchema(schema)}($tableName)");
+    QueryResult r = await executor.execute("PRAGMA ${"table_info".withSchema(schema)}($tableName)");
     return r.listValues<String>("name").toSet();
   }
 
   @override
   Future<Set<String>> listIndex() async {
-    QueryResult r = await executor.rawQuery("PRAGMA ${"index_list".withSchema(schema)}($tableName)");
+    QueryResult r = await executor.execute("PRAGMA ${"index_list".withSchema(schema)}($tableName)");
     return r.listValues<String>("name").toSet();
   }
 
   @override
   Future<Set<String>> indexFields(String indexName) async {
-    QueryResult r = await executor.rawQuery("PRAGMA ${"index_info".withSchema(schema)}($indexName)");
+    QueryResult r = await executor.execute("PRAGMA ${"index_info".withSchema(schema)}($indexName)");
     return r.listValues<String>("name").toSet();
   }
 }

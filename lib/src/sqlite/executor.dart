@@ -17,7 +17,7 @@ class SQliteExecutor implements TranscationalExecutor, SessionExecutor {
   }
 
   @override
-  QueryResult rawQuery(String sql, [AnyList? parameters]) {
+  QueryResult execute(String sql, [AnyList? parameters]) {
     lite.lastInsertRowId = 0;
     return lite.rawQuery(sql, parameters).queryResult(affectedRows: lite.updatedRows);
   }

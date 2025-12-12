@@ -38,7 +38,7 @@ class MySQLPoolExecutor implements TranscationalExecutor {
   }
 
   @override
-  Future<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
+  Future<QueryResult> execute(String sql, [AnyList? parameters]) async {
     final st = await pool.prepare(sql, false);
     return await _StatementExecutor(st).rawQuery(parameters);
   }
@@ -86,7 +86,7 @@ class MySQLExecutor implements TranscationalExecutor, SessionExecutor {
 
   @override
   Future<int> lastInsertId() async {
-    final r = await rawQuery("SELECT LAST_INSERT_ID()");
+    final r = await execute("SELECT LAST_INSERT_ID()");
     return r.firstValue() ?? 0;
   }
 
@@ -97,7 +97,7 @@ class MySQLExecutor implements TranscationalExecutor, SessionExecutor {
   }
 
   @override
-  Future<QueryResult> rawQuery(String sql, [AnyList? parameters]) async {
+  Future<QueryResult> execute(String sql, [AnyList? parameters]) async {
     logQuery(sql, parameters);
     try {
       final st = await connection.prepare(sql, false);

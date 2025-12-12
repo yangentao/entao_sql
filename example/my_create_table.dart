@@ -20,7 +20,7 @@ void main() async {
   println("main");
   MySQLExecutor e = await MySQLExecutor.create(endpoint: endpoint, database: "test");
   println("main 1");
-  final r = await e.rawQuery("select * from  test");
+  final r = await e.execute("select * from  test");
   r.dump();
   println("main drop");
   // await e.connection.execute("DROP TABLE test");

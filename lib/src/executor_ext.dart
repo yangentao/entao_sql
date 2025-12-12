@@ -44,7 +44,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     returning ??= Returning.ALL;
     SpaceBuffer buf = _insertBuffer(table, columns);
     buf << returning.clause;
-    QueryResult rs = await this.rawQuery(buf.toString(), values.toList());
+    QueryResult rs = await this.execute(buf.toString(), values.toList());
     return rs.firstRow();
   }
 
@@ -113,7 +113,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     SpaceBuffer buf = _upsertBuffer(table, columnNames, constraints: constraintNames, otherColumns: otherNames);
     var argList = [...values, ...otherNames.mapList((e) => valueList[columnNames.indexOf(e)])];
     buf << returning.clause;
-    QueryResult rs = await rawQuery(buf.toString(), argList);
+    QueryResult rs = await execute(buf.toString(), argList);
     return rs.firstRow();
   }
 
@@ -170,7 +170,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     if (returning != null) {
       buf << returning.clause;
     }
-    return await rawQuery(buf.toString(), where.args);
+    return await execute(buf.toString(), where.args);
   }
 
   Future<QueryResult> update(Object table, {required Iterable<ColumnValue> values, required Where where, Returning? returning}) async {
@@ -195,7 +195,7 @@ extension LiteSqlInsertExt on SQLExecutor {
     if (returning != null) {
       buf << returning.clause;
     }
-    return await rawQuery(buf.toString(), argList);
+    return await execute(buf.toString(), argList);
   }
 
   Future<void> dump(Type table) async {
@@ -203,7 +203,7 @@ extension LiteSqlInsertExt on SQLExecutor {
   }
 
   Future<void> dumpTable(String table) async {
-    final r = await rawQuery("SELECT * FROM ${table.escapeSQL}");
+    final r = await execute("SELECT * FROM ${table.escapeSQL}");
     r.dump();
   }
 }

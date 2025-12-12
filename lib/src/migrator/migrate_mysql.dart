@@ -28,7 +28,7 @@ class BasicMySQLMigrator extends BasicMigrator {
 
   @override
   Future<QueryResult> execute(String sql, [AnyList? parameters]) async {
-    return await executor.rawQuery(sql, parameters);
+    return await executor.execute(sql, parameters);
   }
 
   @override
