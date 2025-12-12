@@ -8,7 +8,6 @@ import 'package:entao_dutil/entao_dutil.dart';
 import 'package:entao_log/entao_log.dart';
 import 'package:println/println.dart';
 
-part 'migrator/basic_migrator.dart';
 part 'clause/clauses.dart';
 part 'clause/express.dart';
 part 'clause/ext.dart';
@@ -18,6 +17,10 @@ part 'clause/joins.dart';
 part 'clause/where.dart';
 part 'executor.dart';
 part 'executor_ext.dart';
+part 'migrator/basic_migrator.dart';
+part 'migrator/migrate_mysql.dart';
+part 'migrator/migrate_postgres.dart';
+part 'migrator/migrate_sqlite.dart';
 part 'proto/column_proto.dart';
 part 'proto/table_column.dart';
 part 'proto/table_model.dart';
@@ -27,9 +30,7 @@ part 'query_result.dart';
 part 'query_result_ext.dart';
 part 'utils/space_buffer.dart';
 part 'utils/sql_utils.dart';
-part 'migrator/migrate_mysql.dart';
-part 'migrator/migrate_postgres.dart';
-part 'migrator/migrate_sqlite.dart';
+
 typedef FutureCallback = Future<void> Function();
 typedef FutureOrCallback = FutureOr<void> Function();
 
@@ -129,8 +130,7 @@ String _tableNameOf(Object table) {
     case String s:
       return s;
     case Type t:
-      if (t == Object) errorSQL("NO table name");
-      return "$t";
+      return $(t).name;
   }
   errorSQL("Unknown table: $table ");
 }
