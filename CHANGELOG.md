@@ -1,4 +1,6 @@
 ## 0.1.0
 * Initial version.
 ## 0.1.1
-* lower case table name and column name 
+* lower case table name and column name
+## 0.1.2
+* log

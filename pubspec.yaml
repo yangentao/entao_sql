@@ -2,7 +2,7 @@ name: entao_sql
 description: SQLite and PostgreSQL.
 repository: https://github.com/yangentao/entao_sql
 homepage: https://github.com/yangentao/entao_sql
-version: 0.1.1
+version: 0.1.2
 
 environment:
   sdk: ^3.6.0
@@ -16,8 +16,8 @@ dependencies:
 #  mysql1_ext: ^0.0.4
   mysql_client_plus: ^0.1.2
   println: ^1.0.4
-  entao_dutil: ^2.3.1
-  entao_log: ^1.2.8
+  entao_dutil: ^2.3.4
+  entao_log: ^2.0.1
   entao_lint: ^1.0.1
 
 dev_dependencies:
